@@ -1,7 +1,8 @@
 import Vue from 'vue'
 import rules from '@/lib/input_rules'
+import models from '@/lib/models/models'
 
-const utils = { rules }
+const utils = { rules, models }
 
 const components = {
   LinkButton: () => import('~/components/ui/LinkButton.vue'),
