@@ -8,13 +8,18 @@ const getters = {
 }
 const actions = {
   async register({ dispatch }, { displayName, email, password }) {
-    const response = await this.$fire.auth.createUserWithEmailAndPassword(
+    const credentials = await this.$fire.auth.createUserWithEmailAndPassword(
       email,
       password
     )
-    dispatch('sendVerificationEmail')
-    await dispatch('logout')
-    await response.user.updateProfile({ displayName })
+    const user = credentials.user
+    await user.updateProfile({ displayName })
+    await user.sendEmailVerification()
+    await this.$fire.firestore
+      .collection('users')
+      .doc(user.uid)
+      .set({ name: displayName, email, uid: user.uid })
+    dispatch('logout')
   },
 
   async login({ commit }, { email, password }) {
