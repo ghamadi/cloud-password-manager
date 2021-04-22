@@ -1,16 +1,25 @@
+import { User } from '~/lib/models/user'
+import KeyGen from '~/lib/security/key_gen'
+
 const state = () => ({
   currentUser: null,
+  keyGen: null,
 })
 const getters = {
   currentUser(state) {
     return state.currentUser
   },
+
+  keyGen(state) {
+    return state.keyGen
+  },
 }
 const actions = {
   async register({ dispatch }, { displayName, email, password }) {
+    const keyGen = new KeyGen(email, password)
     const credentials = await this.$fire.auth.createUserWithEmailAndPassword(
       email,
-      password
+      keyGen.authKey
     )
     const user = credentials.user
     await user.updateProfile({ displayName })
@@ -23,11 +32,13 @@ const actions = {
   },
 
   async login({ commit }, { email, password }) {
+    const keyGen = new KeyGen(email, password)
     const userCred = await this.$fire.auth.signInWithEmailAndPassword(
       email,
-      password
+      keyGen.authKey
     )
     commit('SET_CURRENT_USER', { authUser: userCred.user })
+    commit('SET_KEY_GEN', keyGen)
     return userCred
   },
 
@@ -43,13 +54,22 @@ const actions = {
 }
 const mutations = {
   SET_CURRENT_USER(state, payload) {
-    const authUser = (payload && payload.authUser) || {}
+    const authUser = (payload && payload.authUser) || null
     if (authUser) {
-      const { uid, displayName, email, emailVerified } = authUser
-      state.currentUser = { uid, displayName, email, emailVerified }
+      const {
+        uid,
+        displayName: name,
+        email,
+        emailVerified: verified,
+      } = authUser
+      state.currentUser = new User({ uid, name, email, verified })
     } else {
       state.currentUser = null
     }
+  },
+
+  SET_KEY_GEN(state, gen) {
+    state.keyGen = gen
   },
 }
 export default { state, getters, actions, mutations }

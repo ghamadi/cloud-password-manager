@@ -1,6 +1,7 @@
 export default function ({ store, route, redirect }) {
-  const user = store.state.auth.currentUser
-  if (user && user.emailVerified) {
+  const user = store.state.auth.currentUser || {}
+
+  if (user.uid && user.verified) {
     if (route.name === 'auth') {
       redirect({ name: 'home' })
     }

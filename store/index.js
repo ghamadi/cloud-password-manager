@@ -9,6 +9,7 @@ const getters = {
 const actions = {
   clearState({ commit }) {
     commit('auth/SET_CURRENT_USER', null)
+    commit('auth/SET_KEY_GEN', null)
     commit('SET_LOADING', false)
     this.$router.push('/auth')
   },
