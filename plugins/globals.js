@@ -7,7 +7,7 @@ const utils = { rules, models }
 const components = {
   LinkButton: () => import('~/components/ui/LinkButton.vue'),
   AlertDialog: () => import('~/components/dialogs/AlertDialog.vue'),
-  ItemFab: () => import('~/components/ui/ItemFab.vue'),
+  ItemFab: () => import('~/components/items/ItemFab.vue'),
 }
 
 Object.entries(components).forEach(([name, component]) =>
