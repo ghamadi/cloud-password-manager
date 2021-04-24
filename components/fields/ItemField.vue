@@ -18,6 +18,7 @@
       hide-details
       color="info"
       :outlined="focused"
+      :rules="[$rules.required]"
       @focus="onFocus"
       @blur="focused = false"
     />
@@ -210,7 +211,6 @@ export default {
 .field-input >>> input {
   font-size: 0.9em;
   padding: 0;
-  border-color: red;
 }
 
 .field-label >>> input {

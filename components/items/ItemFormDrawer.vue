@@ -186,7 +186,13 @@ export default {
       setItem: 'items/SET_CURRENT_ITEM',
       addField: 'items/ADD_FIELD',
     }),
-    submitForm() {},
+    submitForm() {
+      if (this.$refs.item_form.validate()) {
+        console.log('VALID')
+      } else {
+        console.log('NOT VALID')
+      }
+    },
 
     updateItemProperty(property, value) {
       const newItem = { ...this.currentItem }
