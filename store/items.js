@@ -35,7 +35,7 @@ const mutations = {
     state.currentItem.fields.push(new Field(field))
   },
   UPDATE_FIELD_BY_INDEX(state, { newField = {}, index }) {
-    state.currentItem.fields[index] = new Field(newField)
+    state.currentItem.fields.splice(index, 1, new Field(newField))
   },
   REMOVE_FIELD_BY_INDEX(state, index) {
     state.currentItem.fields.splice(index, 1)
