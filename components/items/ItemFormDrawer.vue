@@ -57,6 +57,7 @@
           placeholder="Untitled item..."
           class="title-field"
           :autofocus="currentItem.id === 0"
+          :rules="[$rules.required]"
         ></v-textarea>
       </section>
 
@@ -116,7 +117,7 @@
         </v-combobox>
 
         <v-textarea
-          v-model="currentItem.notes"
+          v-model="notes"
           color="info"
           outlined
           rows="1"
@@ -132,7 +133,7 @@
 </template>
 
 <script>
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapActions, mapMutations } from 'vuex'
 import ItemField from '~/components/fields/ItemField'
 
 export default {
@@ -179,8 +180,18 @@ export default {
         this.updateItemProperty('tags', [...value])
       },
     },
+
+    notes: {
+      get() {
+        return this.currentItem.notes
+      },
+      set(value) {
+        this.updateItemProperty('notes', value)
+      },
+    },
   },
   methods: {
+    ...mapActions({ addItem: 'items/addItem', updateItem: 'items/updateItem' }),
     ...mapMutations({
       setRightDrawer: 'nav/SET_RIGHT_DRAWER',
       setItem: 'items/SET_CURRENT_ITEM',
@@ -188,7 +199,8 @@ export default {
     }),
     submitForm() {
       if (this.$refs.item_form.validate()) {
-        console.log('VALID')
+        if (!this.currentItem.id) this.addItem(this.currentItem)
+        else this.updateItem(this.currentItem)
       } else {
         console.log('NOT VALID')
       }

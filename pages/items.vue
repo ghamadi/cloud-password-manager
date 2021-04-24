@@ -11,8 +11,14 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
 export default {
-  components: {},
+  async mounted() {
+    await this.fetchItems()
+  },
+  methods: {
+    ...mapActions({ fetchItems: 'items/fetchItems' }),
+  },
 }
 </script>
 
