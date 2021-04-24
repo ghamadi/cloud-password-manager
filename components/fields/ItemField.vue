@@ -3,7 +3,7 @@
     <v-btn
       icon
       small
-      color="primary"
+      color="primary lighten-1"
       class="mt-1 ml-4"
       @click="deleteField(fieldIndex)"
     >
@@ -216,5 +216,7 @@ export default {
 
 .field-label >>> input {
   text-align: right;
+  overflow: none;
+  text-overflow: ellipsis;
 }
 </style>
