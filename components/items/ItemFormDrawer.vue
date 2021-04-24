@@ -75,7 +75,7 @@
           color="primary"
           plain
           small
-          @click="addField({ label: 'label' })"
+          @click="addField"
         >
           <v-icon left class="mr-5">mdi-plus-circle</v-icon>
           <span class="text-capitalize">Add&nbsp;</span>
@@ -85,7 +85,7 @@
 
       <v-divider class="mt-2 mb-10"></v-divider>
 
-      <!-- NOTES FIELD -->
+      <!-- NOTES & TAGS -->
       <section class="mx-5">
         <v-combobox
           v-model="tags"
@@ -97,7 +97,7 @@
           small-chips
           outlined
           dense
-          color="primary"
+          color="info"
         >
           <template #selection="data">
             <v-chip

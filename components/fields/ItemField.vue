@@ -15,6 +15,7 @@
       v-model="label"
       dense
       class="field-input field-label shrink mr-2"
+      placeholder="label"
       hide-details
       color="info"
       :outlined="focused"
