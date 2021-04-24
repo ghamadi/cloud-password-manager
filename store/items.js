@@ -39,7 +39,6 @@ const actions = {
 
     const obj = { ...item, id: itemRef.id }
     commit('ADD_ITEM_TO_LIST', obj)
-    console.log('current list', rootState.items.itemsList)
   },
 
   async fetchItems({ rootState, commit }) {
@@ -72,7 +71,6 @@ const actions = {
 
     const obj = { ...item, id: itemRef.id }
     commit('ADD_ITEM_TO_LIST', obj)
-    console.log('current list', rootState.items.itemsList)
   },
 }
 const mutations = {
