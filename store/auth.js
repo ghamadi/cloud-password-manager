@@ -1,4 +1,4 @@
-import { User } from '~/lib/models/user'
+import User from '~/lib/models/user'
 import KeyGen from '~/lib/security/key_gen'
 
 const state = () => ({

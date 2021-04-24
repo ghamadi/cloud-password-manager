@@ -165,6 +165,7 @@ export default {
               this.$router.replace('/')
             }
           } catch (error) {
+            console.log(error)
             if (error.code.match(/(user-not-found)|(wrong-password)/i)) {
               this.badCredentials =
                 'Incorrect email or password. Please try again.'
