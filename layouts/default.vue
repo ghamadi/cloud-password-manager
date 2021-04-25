@@ -2,7 +2,7 @@
   <v-app class="default-layout">
     <nav-drawer></nav-drawer>
 
-    <v-app-bar id="default-app-bar" app clipped-right flat outlined>
+    <v-app-bar id="default-app-bar" app clipped-right outlined elevation="1">
       <div :class="titleClass" style="width: 100%">
         <div class="d-flex align-center">
           <v-btn
@@ -30,7 +30,7 @@
       </div>
     </v-app-bar>
 
-    <v-main @click.native.stop="itemDrawer = false">
+    <v-main @click.native.stop="itemDrawer = false" class="grey lighten-3">
       <v-container>
         <nuxt />
       </v-container>
