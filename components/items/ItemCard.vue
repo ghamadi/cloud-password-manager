@@ -72,11 +72,17 @@ export default {
   },
 
   methods: {
-    ...mapActions({ decryptItem: 'items/decryptItem' }),
+    ...mapActions({
+      decryptItem: 'items/decryptItem',
+      deleteItem: 'items/deleteItem',
+    }),
     ...mapMutations({
       setOpenedItem: 'items/SET_OPENED_ITEM',
       setCurrentItem: 'items/SET_CURRENT_ITEM',
       setRightDrawer: 'nav/SET_RIGHT_DRAWER',
+      setLoading: 'SET_LOADING',
+      setAlertDialog: 'dialogs/SET_ALERT_DIALOG',
+      setCurrentAlert: 'dialogs/SET_CURRENT_ALERT',
     }),
     async openItem() {
       if (!this.dirty) {
@@ -86,7 +92,33 @@ export default {
         this.setRightDrawer(true)
       }
     },
-    confirmDelete() {},
+    confirmDelete() {
+      const okHandler = async () => {
+        try {
+          this.setLoading(true)
+          await this.deleteItem(this.item)
+          this.setAlertDialog(false)
+        } catch (error) {
+          // console.log(error)
+        } finally {
+          this.setLoading(false)
+        }
+      }
+
+      const cancelHandler = () => {
+        this.setAlertDialog(false)
+      }
+
+      const ok = new this.$models.OkButton(() => okHandler())
+      const cancel = new this.$models.CancelButton(() => cancelHandler())
+      const alert = new this.$models.AlertObject({
+        title: 'Delete item',
+        message: `Delete '${this.item.title}'?`,
+        actions: [ok, cancel],
+      })
+      this.setCurrentAlert(alert)
+      this.setAlertDialog(true)
+    },
   },
 }
 </script>

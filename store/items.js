@@ -90,7 +90,6 @@ const actions = {
 
   decryptItem({ rootState, state }, id) {
     const data = state.encryptedItemsMap[id]
-    console.log('data', data)
     const { keyGen } = userAndKey(rootState)
     const decrypted = decrypt(keyGen.vaultKey, data.encryptedItem)
     const storedHMAC = data.itemHMAC
@@ -103,7 +102,6 @@ const actions = {
       hmac: storedHMAC,
       valid,
     }
-    console.log('obj', itemObj)
     return new Item(itemObj)
   },
 
@@ -120,6 +118,18 @@ const actions = {
     const obj = { ...item, id: item.id }
     obj.fields = item.fields.map((f) => new Field(f))
     commit('UPDATE_ITEM_IN_LIST', { item: obj, encryptions: docData })
+  },
+
+  async deleteItem({ rootState, commit }, item) {
+    const userID = rootState.auth.currentUser.uid
+    await this.$fire.firestore
+      .collection('users')
+      .doc(userID)
+      .collection('items')
+      .doc(item.id)
+      .delete()
+
+    commit('REMOVE_ITEM_FROM_LIST', item)
   },
 }
 const mutations = {
@@ -151,6 +161,10 @@ const mutations = {
 
     obj[item.id] = encryptions
     Object.assign(state.encryptedItemsMap, obj)
+  },
+  REMOVE_ITEM_FROM_LIST(state, item) {
+    const index = state.itemsList.findIndex((i) => i.id === item.id)
+    state.itemsList.splice(index, 1)
   },
   ADD_FIELD(state, field = {}) {
     state.currentItem.fields.push(new Field(field))
