@@ -2,6 +2,7 @@ import { categoryIDs } from '~/lib/item_categories'
 import Field from '~/lib/models/field'
 import Item from '~/lib/models/item'
 import { encrypt, decrypt } from '~/lib/security/aes'
+import { hmac512, randomSalt } from '~/lib/security/hmac'
 
 const state = () => ({
   openedItem: null,
@@ -30,14 +31,15 @@ const getters = {
 const actions = {
   async addItem({ rootState, commit }, item) {
     const { userID, keyGen } = userAndKey(rootState)
-    const encryptedItem = encrypt(keyGen.vaultKey, item.toJson())
+    const docData = buildEncryptions(keyGen, item)
+
     const itemRef = await this.$fire.firestore
       .collection('users')
       .doc(userID)
       .collection('items')
-      .add({ encryptedItem })
+      .add(docData)
 
-    const obj = { ...item, id: itemRef.id }
+    const obj = { id: itemRef.id, ...item.toOverviewJson() }
     commit('ADD_ITEM_TO_LIST', obj)
   },
 
@@ -51,9 +53,27 @@ const actions = {
       .get()
 
     querySnapshot.forEach((itemDoc) => {
-      const itemObj = decrypt(keyGen.vaultKey, itemDoc.data().encryptedItem)
-      itemObj.id = itemDoc.id
-      items.push(new Item(itemObj))
+      const data = itemDoc.data()
+      const decryptedOverview = decrypt(keyGen.vaultKey, data.encryptedOverview)
+      const storedHMAC = data.overviewHMAC
+      const computedHMAC = hmac512(
+        decryptedOverview,
+        decryptedOverview.salt,
+        keyGen.vaultKey
+      )
+
+      // no need to store the salt on client
+      // updated records will have new salts
+      delete decryptedOverview.salt
+
+      const valid = storedHMAC === computedHMAC
+      const itemObj = {
+        id: itemDoc.id,
+        ...decryptedOverview,
+        hmac: data.hmacOverview,
+        valid,
+      }
+      items.push(itemObj)
     })
 
     commit('SET_ITEMS_LIST', items)
@@ -61,13 +81,13 @@ const actions = {
 
   async updateItem({ rootState, commit }, item) {
     const { userID, keyGen } = userAndKey(rootState)
-    const encryptedItem = encrypt(keyGen.vaultKey, item.toJson())
+    const docData = buildEncryptions(keyGen, item)
     const itemRef = await this.$fire.firestore
       .collection('users')
       .doc(userID)
       .collection('items')
       .doc(item.id)
-      .set({ encryptedItem })
+      .set(docData)
 
     const obj = { ...item, id: itemRef.id }
     commit('ADD_ITEM_TO_LIST', obj)
@@ -119,4 +139,31 @@ function userAndKey(rootState) {
   const userID = rootState.auth.currentUser.uid
   const keyGen = rootState.auth.keyGen
   return { userID, keyGen }
+}
+
+function signItem(keyGen, item) {
+  const record = { ...item }
+  const salt = randomSalt()
+  record.salt = salt
+  const hmac = hmac512(item, salt, keyGen.vaultKey)
+  return { record, hmac }
+}
+
+function buildEncryptions(keyGen, item) {
+  const sig1 = signItem(keyGen, item.toJson())
+  const sig2 = signItem(keyGen, item.toOverviewJson())
+
+  const { itemHMAC, overviewHMAC } = {
+    itemHMAC: sig1.hmac,
+    overviewHMAC: sig2.hmac,
+  }
+  const { saltedRecord, saltedOverview } = {
+    saltedRecord: sig1.record,
+    saltedOverview: sig2.record,
+  }
+
+  const encryptedItem = encrypt(keyGen.vaultKey, saltedRecord)
+  const encryptedOverview = encrypt(keyGen.vaultKey, saltedOverview)
+
+  return { encryptedItem, encryptedOverview, itemHMAC, overviewHMAC }
 }
