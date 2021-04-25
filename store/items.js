@@ -8,6 +8,7 @@ const state = () => ({
   openedItem: null,
   currentItem: new Item({ id: 0, categoryID: categoryIDs.password }),
   itemsList: [],
+  encryptedItemsMap: {},
 })
 
 const getters = {
@@ -19,6 +20,9 @@ const getters = {
   },
   itemsList(state) {
     return state.itemsList
+  },
+  encryptedItems(state) {
+    return state.encryptedItems
   },
   dirty(state) {
     return (
@@ -45,6 +49,7 @@ const actions = {
 
   async fetchItems({ rootState, commit }) {
     const items = []
+    const detailedItems = {}
     const { userID, keyGen } = userAndKey(rootState)
     const querySnapshot = await this.$fire.firestore
       .collection('users')
@@ -70,27 +75,51 @@ const actions = {
       const itemObj = {
         id: itemDoc.id,
         ...decryptedOverview,
-        hmac: data.hmacOverview,
+        hmac: storedHMAC,
         valid,
       }
       items.push(itemObj)
+      detailedItems[itemDoc.id] = (({ encryptedItem, itemHMAC }) => ({
+        encryptedItem,
+        itemHMAC,
+      }))(data)
     })
-
+    commit('SET_ENCRYPTED_ITEMS_MAP', detailedItems)
     commit('SET_ITEMS_LIST', items)
+  },
+
+  decryptItem({ rootState, state }, id) {
+    const data = state.encryptedItemsMap[id]
+    console.log('data', data)
+    const { keyGen } = userAndKey(rootState)
+    const decrypted = decrypt(keyGen.vaultKey, data.encryptedItem)
+    const storedHMAC = data.itemHMAC
+    const computedHMAC = hmac512(decrypted, decrypted.salt, keyGen.vaultKey)
+    delete decrypted.salt
+    const valid = storedHMAC === computedHMAC
+    const itemObj = {
+      id,
+      ...decrypted,
+      hmac: storedHMAC,
+      valid,
+    }
+    console.log('obj', itemObj)
+    return new Item(itemObj)
   },
 
   async updateItem({ rootState, commit }, item) {
     const { userID, keyGen } = userAndKey(rootState)
     const docData = buildEncryptions(keyGen, item)
-    const itemRef = await this.$fire.firestore
+    await this.$fire.firestore
       .collection('users')
       .doc(userID)
       .collection('items')
       .doc(item.id)
       .set(docData)
 
-    const obj = { ...item, id: itemRef.id }
-    commit('ADD_ITEM_TO_LIST', obj)
+    const obj = { ...item, id: item.id }
+    obj.fields = item.fields.map((f) => new Field(f))
+    commit('UPDATE_ITEM_IN_LIST', { item: obj, encryptions: docData })
   },
 }
 const mutations = {
@@ -104,8 +133,24 @@ const mutations = {
   SET_ITEMS_LIST(state, itemsList = []) {
     state.itemsList = [...itemsList]
   },
+  SET_ENCRYPTED_ITEMS_MAP(state, value = {}) {
+    state.encryptedItemsMap = {}
+    Object.assign(state.encryptedItemsMap, value)
+  },
   ADD_ITEM_TO_LIST(state, item = {}) {
-    state.itemsList.push(new Item(item))
+    item = new Item(item)
+    item.trimValues()
+    state.itemsList.push(item)
+  },
+  UPDATE_ITEM_IN_LIST(state, { item = {}, encryptions }) {
+    const index = state.itemsList.findIndex((i) => i.id === item.id)
+    const copy = new Item(item)
+    copy.trimValues()
+    state.itemsList.splice(index, 1, copy)
+    const obj = {}
+
+    obj[item.id] = encryptions
+    Object.assign(state.encryptedItemsMap, obj)
   },
   ADD_FIELD(state, field = {}) {
     state.currentItem.fields.push(new Field(field))

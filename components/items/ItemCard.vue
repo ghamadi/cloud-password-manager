@@ -50,8 +50,9 @@
 </template>
 
 <script>
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapActions, mapMutations } from 'vuex'
 import Item from '~/lib/models/item'
+
 export default {
   props: {
     item: {
@@ -67,19 +68,21 @@ export default {
   },
 
   computed: {
-    ...mapGetters({ dirty: 'items/dirty' }),
+    ...mapGetters({ dirty: 'items/dirty', items: 'items/itemsList' }),
   },
 
   methods: {
+    ...mapActions({ decryptItem: 'items/decryptItem' }),
     ...mapMutations({
       setOpenedItem: 'items/SET_OPENED_ITEM',
       setCurrentItem: 'items/SET_CURRENT_ITEM',
       setRightDrawer: 'nav/SET_RIGHT_DRAWER',
     }),
-    openItem() {
+    async openItem() {
       if (!this.dirty) {
-        this.setOpenedItem({ ...this.item })
-        this.setCurrentItem({ ...this.item })
+        const itemToOpen = await this.decryptItem(this.item.id)
+        this.setOpenedItem({ ...itemToOpen })
+        this.setCurrentItem({ ...itemToOpen })
         this.setRightDrawer(true)
       }
     },
