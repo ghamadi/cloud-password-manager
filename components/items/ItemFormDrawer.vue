@@ -194,13 +194,22 @@ export default {
     ...mapActions({ addItem: 'items/addItem', updateItem: 'items/updateItem' }),
     ...mapMutations({
       setRightDrawer: 'nav/SET_RIGHT_DRAWER',
-      setItem: 'items/SET_CURRENT_ITEM',
+      setCurrentItem: 'items/SET_CURRENT_ITEM',
+      setOpenedItem: 'items/SET_OPENED_ITEM',
       addField: 'items/ADD_FIELD',
     }),
     submitForm() {
       if (this.$refs.item_form.validate()) {
-        if (!this.currentItem.id) this.addItem(this.currentItem)
-        else this.updateItem(this.currentItem)
+        try {
+          if (!this.currentItem.id) this.addItem(this.currentItem)
+          else this.updateItem(this.currentItem)
+
+          this.setOpenedItem(null)
+          this.setCurrentItem({})
+          this.setRightDrawer(false)
+        } catch (error) {
+          console.log(error)
+        }
       } else {
         console.log('NOT VALID')
       }
@@ -209,7 +218,7 @@ export default {
     updateItemProperty(property, value) {
       const newItem = { ...this.currentItem }
       newItem[property] = value
-      this.setItem(newItem)
+      this.setCurrentItem(newItem)
     },
     filter(item, queryText, itemText) {
       if (item.header) return false
