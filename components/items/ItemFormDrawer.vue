@@ -58,6 +58,7 @@
           class="title-field"
           :autofocus="currentItem.id === 0"
           :rules="[$rules.required]"
+          validate-on-blur
         ></v-textarea>
       </section>
 
