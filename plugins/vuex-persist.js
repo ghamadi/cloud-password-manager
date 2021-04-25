@@ -1,13 +1,9 @@
 import VuexPersistence from 'vuex-persist'
 
 export default ({ store }) => {
-  console.log('plugin')
   new VuexPersistence({
     /* your options */
     reducer: (state) => {
-      if (state.auth.keyGen) {
-        console.log('TYPE', typeof state.auth.keyGen.vaultKey)
-      }
       return {
         auth: {
           keyGen: state.auth.keyGen
