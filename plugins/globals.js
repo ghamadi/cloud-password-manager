@@ -7,6 +7,7 @@ const utils = { rules, models, categoryIDs, categories }
 
 const components = {
   LinkButton: () => import('~/components/ui/LinkButton.vue'),
+  DialogBase: () => import('~/components/dialogs/DialogBase.vue'),
   AlertDialog: () => import('~/components/dialogs/AlertDialog.vue'),
   ItemFab: () => import('~/components/items/ItemFab.vue'),
 }
