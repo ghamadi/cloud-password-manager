@@ -76,15 +76,47 @@
       :type="type"
       color="info"
       dense
-      outlined
-      class="field-input"
+      :outlined="!typeIsPassword"
+      :loading="typeIsPassword"
+      :class="`field-input ${typeIsPassword ? 'password-input' : ''}`"
       hide-details
-    ></v-text-field>
+    >
+      <template #progress>
+        <v-progress-linear
+          v-if="typeIsPassword"
+          :value="passwordStrength.strength"
+          :color="passwordStrength.color"
+          background-opacity="0.2"
+          :indeterminate="false"
+          absolute
+          height="4"
+          rounded
+          style="top: 26px"
+        ></v-progress-linear>
+      </template>
+
+      <template #append>
+        <v-btn
+          v-if="typeIsPassword"
+          icon
+          x-small
+          :ripple="false"
+          class="mr-3 mt-1"
+          @click="showPass = !showPass"
+        >
+          <v-icon color="info">{{ inputAppendIcon }}</v-icon>
+        </v-btn>
+      </template>
+    </v-text-field>
+
+    <v-btn v-if="typeIsPassword" icon small @click="openPassGen">
+      <v-icon small>mdi-key-variant</v-icon>
+    </v-btn>
 
     <!-- TYPE PICKER -->
     <v-menu v-model="fieldActions">
       <template #activator="{ on, attrs }">
-        <v-btn icon small v-bind="attrs" class="mr-3 ml-2" v-on="on">
+        <v-btn icon small v-bind="attrs" class="mr-3" v-on="on">
           <v-icon small>mdi-dots-horizontal-circle-outline</v-icon>
         </v-btn>
       </template>
@@ -108,14 +140,8 @@
 <script>
 import { mapGetters, mapMutations } from 'vuex'
 import { categories } from '~/lib/item_categories'
-
-/**
- * Use the 'currentItem' value in the store
- * turn the data properties below into computed properties that mutate the corresponding properties of
- * the related field within 'currentItem'
- *
- * In order to reference the related field, pass its index as a prop to this component
- */
+import { AlertObject, CancelButton, OkButton } from '~/lib/models/alert_data'
+import { scorePassword } from '~/lib/password_generator'
 
 export default {
   props: {
@@ -130,11 +156,29 @@ export default {
       datePicker: false,
       fieldActions: false,
       focused: false,
+      showPassGen: false,
+      showPass: false,
     }
   },
 
   computed: {
-    ...mapGetters({ item: 'items/currentItem' }),
+    ...mapGetters({
+      item: 'items/currentItem',
+      passGenDialog: 'dialogs/passGenDialog',
+      randomPass: 'pass/randomPass',
+    }),
+
+    inputAppendIcon() {
+      if (this.typeIsPassword) {
+        return this.showPass ? 'mdi-eye' : 'mdi-eye-off'
+      }
+      return ''
+    },
+
+    typeIsPassword() {
+      return this.getFieldProperty('type') === 'password'
+    },
+
     currentField() {
       return this.item.fields[this.fieldIndex]
     },
@@ -156,11 +200,19 @@ export default {
     },
     type: {
       get() {
-        return this.getFieldProperty('type') || 'text'
+        const val = this.getFieldProperty('type')
+        if (val === 'password') {
+          return (!this.showPass && val) || 'text'
+        }
+        return val || 'text'
       },
       set(value) {
         this.updateFieldProperty('type', value)
       },
+    },
+    passwordStrength() {
+      const { score, gaugeColor } = scorePassword(this.value)
+      return { strength: score, color: gaugeColor }
     },
   },
 
@@ -168,6 +220,9 @@ export default {
     ...mapMutations({
       updateField: 'items/UPDATE_FIELD_BY_INDEX',
       deleteField: 'items/REMOVE_FIELD_BY_INDEX',
+      setCurrentAlert: 'dialogs/SET_CURRENT_ALERT',
+      setPassGenDialog: 'dialogs/SET_PASS_GEN_DIALOG',
+      setRandomPass: 'pass/SET_RANDOM_PASS',
     }),
 
     updateFieldProperty(property, value) {
@@ -184,11 +239,37 @@ export default {
       event.target.select()
       this.focused = true
     },
+    openPassGen() {
+      const okHandler = () => {
+        this.value = this.randomPass
+        this.setPassGenDialog(false)
+        this.setRandomPass(null)
+      }
+      const cancelHandler = () => {
+        this.setPassGenDialog(false)
+        this.setRandomPass(null)
+      }
+
+      const ok = new OkButton(okHandler)
+      const cancel = new CancelButton(cancelHandler)
+
+      const alertObject = new AlertObject({
+        title: 'Password Generator',
+        message: 'test',
+        actions: [ok, cancel],
+      })
+      this.setRandomPass(this.value)
+      this.setCurrentAlert(alertObject)
+      this.setPassGenDialog(true)
+    },
   },
 }
 </script>
 
 <style scoped>
+.item-field {
+  position: relative;
+}
 .field-label >>> .v-input__slot {
   width: 150px;
 }
@@ -212,6 +293,15 @@ export default {
 .field-input >>> input {
   font-size: 0.9em;
   padding: 0;
+}
+
+.field-input.password-input {
+  border: 1px solid #6f7782;
+  border-radius: 5px;
+}
+
+.field-input.password-input >>> input {
+  padding-left: 5px;
 }
 
 .field-label >>> input {
