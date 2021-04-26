@@ -31,7 +31,7 @@
         </v-btn>
 
         <div class="d-flex align-end justify-space-around mr-1">
-          <!-- <header-actions></header-actions> -->
+          <item-header-actions></item-header-actions>
           <v-btn
             small
             icon
@@ -136,10 +136,11 @@
 <script>
 import { mapGetters, mapActions, mapMutations } from 'vuex'
 import ItemField from '~/components/fields/ItemField'
-
+import ItemHeaderActions from '~/components/items/ItemHeaderActions'
 export default {
   components: {
     ItemField,
+    ItemHeaderActions,
   },
   data() {
     return {
