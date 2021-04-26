@@ -43,8 +43,9 @@ const actions = {
       .collection('items')
       .add(docData)
 
-    const obj = { id: itemRef.id, ...item.toOverviewJson() }
-    commit('ADD_ITEM_TO_LIST', obj)
+    const obj = { ...item, id: itemRef.id }
+
+    commit('ADD_ITEM_TO_LIST', { item: obj, encryptions: docData })
   },
 
   async fetchItems({ rootState, commit }) {
@@ -147,18 +148,22 @@ const mutations = {
     state.encryptedItemsMap = {}
     Object.assign(state.encryptedItemsMap, value)
   },
-  ADD_ITEM_TO_LIST(state, item = {}) {
+  ADD_ITEM_TO_LIST(state, { item = {}, encryptions }) {
     item = new Item(item)
     item.trimValues()
     state.itemsList.push(item)
+
+    const obj = {}
+    obj[item.id] = encryptions
+    Object.assign(state.encryptedItemsMap, obj)
   },
   UPDATE_ITEM_IN_LIST(state, { item = {}, encryptions }) {
     const index = state.itemsList.findIndex((i) => i.id === item.id)
     const copy = new Item(item)
     copy.trimValues()
     state.itemsList.splice(index, 1, copy)
-    const obj = {}
 
+    const obj = {}
     obj[item.id] = encryptions
     Object.assign(state.encryptedItemsMap, obj)
   },
