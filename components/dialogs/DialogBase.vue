@@ -1,6 +1,6 @@
 <template>
   <v-card>
-    <v-card-title style="font-size: 1em">
+    <v-card-title style="font-size: 1.5em">
       {{ alertObject.title }}
     </v-card-title>
     <v-card-text class="pb-0 font-weight-light">
