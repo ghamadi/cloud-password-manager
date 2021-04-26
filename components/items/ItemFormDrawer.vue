@@ -36,7 +36,7 @@
             small
             icon
             class="semi-squared ml-2"
-            @click.stop="drawer = false"
+            @click.stop="discardAndClose"
           >
             <v-icon size="20">mdi-arrow-collapse-right</v-icon>
           </v-btn>
@@ -151,6 +151,7 @@ export default {
       dirty: 'items/dirty',
       rightDrawer: 'nav/rightDrawer',
       currentItem: 'items/currentItem',
+      openedItem: 'items/openedItem',
     }),
     drawer: {
       get() {
@@ -199,6 +200,10 @@ export default {
       setOpenedItem: 'items/SET_OPENED_ITEM',
       addField: 'items/ADD_FIELD',
     }),
+    discardAndClose() {
+      this.setCurrentItem(this.openedItem)
+      this.drawer = false
+    },
     submitForm() {
       if (this.$refs.item_form.validate()) {
         try {
