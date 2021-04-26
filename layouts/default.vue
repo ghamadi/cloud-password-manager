@@ -30,13 +30,13 @@
       </div>
     </v-app-bar>
 
-    <v-main @click.native.stop="itemDrawer = false" class="grey lighten-3">
+    <v-main class="grey lighten-3" @click.native.stop="itemDrawer = false">
       <v-container>
         <nuxt />
       </v-container>
 
       <alert-dialog></alert-dialog>
-
+      <pass-gen-dialog></pass-gen-dialog>
       <item-fab></item-fab>
       <item-form-drawer></item-form-drawer>
     </v-main>
@@ -47,11 +47,13 @@
 import { mapGetters, mapMutations } from 'vuex'
 import NavDrawer from '~/components/ui/nav/NavDrawer'
 import ItemFormDrawer from '~/components/items/ItemFormDrawer'
+import PassGenDialog from '~/components/dialogs/PassGenDialog'
 
 export default {
   components: {
     NavDrawer,
     ItemFormDrawer,
+    PassGenDialog,
   },
 
   computed: {
