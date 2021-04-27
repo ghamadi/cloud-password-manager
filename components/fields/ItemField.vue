@@ -37,7 +37,6 @@
       auto-grow
       no-resize
       hide-details
-      :autofocus="requirement.id === 0"
     ></v-textarea>
 
     <!-- DATE INPUT (if type == date) -->
@@ -57,7 +56,7 @@
           color="info"
           dense
           v-bind="attrs"
-          :placeholder="`${label}...`"
+          placeholder="Click to pick a date"
           hide-details
           class="field-input"
           v-on="on"
@@ -121,14 +120,19 @@
         </v-btn>
       </template>
       <v-list dense shaped>
-        <v-list-item-group v-model="type" multiple color="indigo">
-          <v-list-item v-for="(category, i) in categories" :key="i" dense>
+        <v-list-item-group v-model="type" color="primary">
+          <v-list-item
+            v-for="(fieldType, i) in fieldTypes"
+            :key="i"
+            dense
+            :value="fieldType.value"
+          >
             <v-list-item-icon>
-              <v-icon v-text="category.icon"></v-icon>
+              <v-icon v-text="fieldType.icon"></v-icon>
             </v-list-item-icon>
 
             <v-list-item-content>
-              <v-list-item-title v-text="category.label"></v-list-item-title>
+              <v-list-item-title v-text="fieldType.label"></v-list-item-title>
             </v-list-item-content>
           </v-list-item>
         </v-list-item-group>
@@ -158,6 +162,16 @@ export default {
       focused: false,
       showPassGen: false,
       showPass: false,
+      fieldTypes: [
+        { icon: 'mdi-text', label: 'Text', value: 'text' },
+        { icon: 'mdi-text-subject', label: 'Long text', value: 'long-text' },
+        { icon: 'mdi-calendar', label: 'Date', value: 'date' },
+        {
+          icon: 'mdi-form-textbox-password',
+          label: 'Password',
+          value: 'password',
+        },
+      ],
     }
   },
 
@@ -207,6 +221,7 @@ export default {
         return val || 'text'
       },
       set(value) {
+        if (value === 'date') this.value = ''
         this.updateFieldProperty('type', value)
       },
     },
