@@ -35,7 +35,7 @@ const getters = {
 const actions = {
   async addItem({ rootState, commit }, item) {
     const { userID, keyGen } = userAndKey(rootState)
-    const docData = buildEncryptions(keyGen, item)
+    const docData = buildEncryptions(keyGen.vaultKey, item)
     commit('SET_LOADING', true, { root: true })
 
     const itemRef = await this.$fire.firestore
@@ -115,7 +115,7 @@ const actions = {
 
   async updateItem({ rootState, commit }, item) {
     const { userID, keyGen } = userAndKey(rootState)
-    const docData = buildEncryptions(keyGen, item)
+    const docData = buildEncryptions(keyGen.vaultKey, item)
     commit('SET_LOADING', true, { root: true })
     await this.$fire.firestore
       .collection('users')
@@ -218,17 +218,17 @@ function userAndKey(rootState) {
   return { userID, keyGen }
 }
 
-function signItem(keyGen, item) {
+function signWithHMAC(key, item) {
   const record = { ...item }
   const salt = randomSalt()
   record.salt = salt
-  const hmac = hmac512(item, salt, keyGen.vaultKey)
+  const hmac = hmac512(item, salt, key)
   return { record, hmac }
 }
 
-function buildEncryptions(keyGen, item) {
-  const sig1 = signItem(keyGen, item.toJson())
-  const sig2 = signItem(keyGen, item.toOverviewJson())
+function buildEncryptions(key, item) {
+  const sig1 = signWithHMAC(key, item.toJson())
+  const sig2 = signWithHMAC(key, item.toOverviewJson())
 
   const { itemHMAC, overviewHMAC } = {
     itemHMAC: sig1.hmac,
@@ -239,8 +239,8 @@ function buildEncryptions(keyGen, item) {
     saltedOverview: sig2.record,
   }
 
-  const encryptedItem = encrypt(keyGen.vaultKey, saltedRecord)
-  const encryptedOverview = encrypt(keyGen.vaultKey, saltedOverview)
+  const encryptedItem = encrypt(key, saltedRecord)
+  const encryptedOverview = encrypt(key, saltedOverview)
 
   return { encryptedItem, encryptedOverview, itemHMAC, overviewHMAC }
 }
