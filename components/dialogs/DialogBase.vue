@@ -3,7 +3,7 @@
     <v-card-title style="font-size: 1.5em">
       {{ alertObject.title }}
     </v-card-title>
-    <v-card-text class="pb-0 font-weight-light">
+    <v-card-text class="mt-5 font-weight-light" style="font-size: 1.1em">
       <slot> {{ alertObject.message }}</slot>
     </v-card-text>
     <v-card-actions v-if="alertObject.actions">
