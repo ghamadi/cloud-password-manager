@@ -31,7 +31,7 @@
         </v-btn>
 
         <div class="d-flex align-end justify-space-around mr-1">
-          <item-header-actions></item-header-actions>
+          <item-header-actions v-if="currentItem.id"></item-header-actions>
           <v-btn
             small
             icon
@@ -217,8 +217,6 @@ export default {
         } catch (error) {
           console.log(error)
         }
-      } else {
-        console.log('NOT VALID')
       }
     },
 
