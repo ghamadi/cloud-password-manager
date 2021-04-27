@@ -1,8 +1,8 @@
 import { categoryIDs } from '~/lib/item_categories'
 import Field from '~/lib/models/field'
 import Item from '~/lib/models/item'
-import { encrypt, decrypt } from '~/lib/security/aes'
 import { hmac512, randomSalt } from '~/lib/security/hmac'
+import { encrypt, decrypt } from '~/lib/security/aes'
 
 const state = () => ({
   openedItem: null,
@@ -35,7 +35,7 @@ const getters = {
 const actions = {
   async addItem({ rootState, commit }, item) {
     const { userID, keyGen } = userAndKey(rootState)
-    const docData = buildEncryptions(keyGen.vaultKey, item)
+    const docData = signAndEncryptAES(keyGen.vaultKey, item)
     commit('SET_LOADING', true, { root: true })
 
     const itemRef = await this.$fire.firestore
@@ -115,7 +115,7 @@ const actions = {
 
   async updateItem({ rootState, commit }, item) {
     const { userID, keyGen } = userAndKey(rootState)
-    const docData = buildEncryptions(keyGen.vaultKey, item)
+    const docData = signAndEncryptAES(keyGen.vaultKey, item)
     commit('SET_LOADING', true, { root: true })
     await this.$fire.firestore
       .collection('users')
@@ -218,15 +218,7 @@ function userAndKey(rootState) {
   return { userID, keyGen }
 }
 
-function signWithHMAC(key, item) {
-  const record = { ...item }
-  const salt = randomSalt()
-  record.salt = salt
-  const hmac = hmac512(item, salt, key)
-  return { record, hmac }
-}
-
-function buildEncryptions(key, item) {
+function signAndEncryptAES(key, item) {
   const sig1 = signWithHMAC(key, item.toJson())
   const sig2 = signWithHMAC(key, item.toOverviewJson())
 
@@ -243,4 +235,12 @@ function buildEncryptions(key, item) {
   const encryptedOverview = encrypt(key, saltedOverview)
 
   return { encryptedItem, encryptedOverview, itemHMAC, overviewHMAC }
+}
+
+function signWithHMAC(key, item) {
+  const record = { ...item }
+  const salt = randomSalt()
+  record.salt = salt
+  const hmac = hmac512(item, salt, key)
+  return { record, hmac }
 }
