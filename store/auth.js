@@ -15,8 +15,10 @@ const getters = {
   },
 }
 const actions = {
-  async register({ dispatch }, { displayName, email, password }) {
+  async register({ dispatch, commit }, { displayName, email, password }) {
     const keyGen = new KeyGen(email, password)
+    commit('SET_LOADING', true, { root: true })
+
     const credentials = await this.$fire.auth.createUserWithEmailAndPassword(
       email,
       keyGen.authKey
@@ -29,10 +31,13 @@ const actions = {
       .doc(user.uid)
       .set({ name: displayName, email, uid: user.uid })
     dispatch('logout')
+
+    commit('SET_LOADING', false, { root: true })
   },
 
   async login({ commit }, { email, password }) {
     const keyGen = new KeyGen(email, password)
+    commit('SET_LOADING', true, { root: true })
     const userCred = await this.$fire.auth.signInWithEmailAndPassword(
       email,
       keyGen.authKey
@@ -47,8 +52,10 @@ const actions = {
     dispatch('clearState', null, { root: true })
   },
 
-  async sendVerificationEmail(ctx) {
+  async sendVerificationEmail({ commit }) {
+    commit('SET_LOADING', true, { root: true })
     const response = await this.$fire.auth.currentUser.sendEmailVerification()
+    commit('SET_LOADING', false, { root: true })
     return response
   },
 }

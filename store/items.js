@@ -36,6 +36,7 @@ const actions = {
   async addItem({ rootState, commit }, item) {
     const { userID, keyGen } = userAndKey(rootState)
     const docData = buildEncryptions(keyGen, item)
+    commit('SET_LOADING', true, { root: true })
 
     const itemRef = await this.$fire.firestore
       .collection('users')
@@ -45,6 +46,7 @@ const actions = {
 
     const obj = { ...item, id: itemRef.id }
 
+    commit('SET_LOADING', false, { root: true })
     commit('ADD_ITEM_TO_LIST', { item: obj, encryptions: docData })
   },
 
@@ -52,6 +54,9 @@ const actions = {
     const items = []
     const detailedItems = {}
     const { userID, keyGen } = userAndKey(rootState)
+
+    commit('SET_LOADING', true, { root: true })
+
     const querySnapshot = await this.$fire.firestore
       .collection('users')
       .doc(userID)
@@ -85,6 +90,8 @@ const actions = {
         itemHMAC,
       }))(data)
     })
+
+    commit('SET_LOADING', false, { root: true })
     commit('SET_ENCRYPTED_ITEMS_MAP', detailedItems)
     commit('SET_ITEMS_LIST', items)
   },
@@ -109,6 +116,7 @@ const actions = {
   async updateItem({ rootState, commit }, item) {
     const { userID, keyGen } = userAndKey(rootState)
     const docData = buildEncryptions(keyGen, item)
+    commit('SET_LOADING', true, { root: true })
     await this.$fire.firestore
       .collection('users')
       .doc(userID)
@@ -118,11 +126,15 @@ const actions = {
 
     const obj = { ...item, id: item.id }
     obj.fields = item.fields.map((f) => new Field(f))
+
+    commit('SET_LOADING', false, { root: true })
     commit('UPDATE_ITEM_IN_LIST', { item: obj, encryptions: docData })
   },
 
   async deleteItem({ rootState, commit }, item) {
     const userID = rootState.auth.currentUser.uid
+    commit('SET_LOADING', true, { root: true })
+
     await this.$fire.firestore
       .collection('users')
       .doc(userID)
@@ -130,6 +142,7 @@ const actions = {
       .doc(item.id)
       .delete()
 
+    commit('SET_LOADING', false, { root: true })
     commit('REMOVE_ITEM_FROM_LIST', item)
   },
 }
