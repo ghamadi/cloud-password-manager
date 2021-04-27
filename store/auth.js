@@ -30,6 +30,11 @@ const actions = {
       .collection('users')
       .doc(user.uid)
       .set({ name: displayName, email, uid: user.uid })
+
+    await this.$fire.firestore
+      .collection('publicKeys')
+      .add({ email, publicKey: keyGen.publicKey.toString() })
+
     dispatch('logout')
 
     commit('SET_LOADING', false, { root: true })
