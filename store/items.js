@@ -162,9 +162,12 @@ const mutations = {
     Object.assign(state.encryptedItemsMap, value)
   },
   ADD_ITEM_TO_LIST(state, { item = {}, encryptions }) {
-    item = new Item(item)
-    item.trimValues()
-    state.itemsList.push(item)
+    const itemToAdd = new Item({
+      id: item.id,
+      ...new Item(item).toOverviewJson(),
+    })
+    itemToAdd.trimValues()
+    state.itemsList.push(itemToAdd)
 
     const obj = {}
     obj[item.id] = encryptions
