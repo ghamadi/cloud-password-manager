@@ -3,6 +3,7 @@ import { AlertObject } from '~/lib/models/alert_data'
 const state = () => ({
   alertDialog: false,
   passGenDialog: false,
+  sharingDialog: false,
   currentAlert: {},
 })
 
@@ -13,6 +14,10 @@ const getters = {
 
   passGenDialog(state) {
     return state.passGenDialog
+  },
+
+  sharingDialog(state) {
+    return state.sharingDialog
   },
 
   currentAlert(state) {
@@ -29,6 +34,10 @@ const mutations = {
 
   SET_PASS_GEN_DIALOG(state, value) {
     state.passGenDialog = value
+  },
+
+  SET_SHARING_DIALOG(state, value) {
+    state.sharingDialog = value
   },
 
   SET_CURRENT_ALERT(state, obj) {

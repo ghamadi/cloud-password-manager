@@ -24,13 +24,22 @@
             </v-btn>
           </template>
           <v-list dense>
-            <v-list-item link dense @click="confirmDelete">
-              <v-list-item-title>
-                <v-icon color="primary" class="mt-n1" small left>
-                  mdi-delete-outline
+            <v-list-item
+              v-for="(action, index) in actions"
+              :key="index"
+              link
+              dense
+              @click="action.handler"
+            >
+              <v-list-item-title class="py-0 d-flex align-center">
+                <v-icon :color="action.color" size="22" left>
+                  {{ action.icon }}
                 </v-icon>
-                <span class="font-weight-medium primary--text">
-                  Delete item
+                <span
+                  :class="`font-weight-light ${action.color}--text`"
+                  style="font-size: 1.1em"
+                >
+                  {{ action.label }}
                 </span>
               </v-list-item-title>
             </v-list-item>
@@ -63,7 +72,20 @@ export default {
 
   data() {
     return {
-      actions: [{ icon: 'mdi-delete', color: 'primary', label: 'delete' }],
+      actions: [
+        {
+          icon: 'mdi-share-outline',
+          color: 'info',
+          label: 'Share item',
+          handler: this.openSharingDialog,
+        },
+        {
+          icon: 'mdi-delete-outline',
+          color: 'primary',
+          label: 'Delete item',
+          handler: this.confirmDelete,
+        },
+      ],
     }
   },
 
@@ -75,6 +97,7 @@ export default {
     ...mapActions({
       decryptItem: 'items/decryptItem',
       deleteItem: 'items/deleteItem',
+      addSharedItems: 'shared_items/addSharedItems',
     }),
     ...mapMutations({
       setOpenedItem: 'items/SET_OPENED_ITEM',
@@ -83,6 +106,7 @@ export default {
       setLoading: 'SET_LOADING',
       setAlertDialog: 'dialogs/SET_ALERT_DIALOG',
       setCurrentAlert: 'dialogs/SET_CURRENT_ALERT',
+      setSharingDialog: 'dialogs/SET_SHARING_DIALOG',
     }),
     async openItem() {
       if (!this.dirty) {
@@ -118,6 +142,32 @@ export default {
       })
       this.setCurrentAlert(alert)
       this.setAlertDialog(true)
+    },
+
+    openSharingDialog() {
+      const okHandler = async () => {
+        try {
+          await this.addSharedItems()
+          this.setSharingDialog(false)
+        } catch (error) {
+          console.log('error', error)
+        } finally {
+          this.setLoading(false)
+        }
+      }
+
+      const cancelHandler = () => {
+        this.setSharingDialog(false)
+      }
+
+      const ok = new this.$models.OkButton(() => okHandler())
+      const cancel = new this.$models.CancelButton(() => cancelHandler())
+      const alert = new this.$models.AlertObject({
+        title: 'Share an item',
+        actions: [ok, cancel],
+      })
+      this.setCurrentAlert(alert)
+      this.setSharingDialog(true)
     },
   },
 }

@@ -37,6 +37,7 @@
 
       <alert-dialog></alert-dialog>
       <pass-gen-dialog></pass-gen-dialog>
+      <sharing-dialog></sharing-dialog>
       <item-fab></item-fab>
       <item-form-drawer></item-form-drawer>
     </v-main>
@@ -48,12 +49,14 @@ import { mapGetters, mapMutations } from 'vuex'
 import NavDrawer from '~/components/ui/nav/NavDrawer'
 import ItemFormDrawer from '~/components/items/ItemFormDrawer'
 import PassGenDialog from '~/components/dialogs/PassGenDialog'
+import SharingDialog from '~/components/dialogs/SharingDialog'
 
 export default {
   components: {
     NavDrawer,
     ItemFormDrawer,
     PassGenDialog,
+    SharingDialog,
   },
 
   computed: {
