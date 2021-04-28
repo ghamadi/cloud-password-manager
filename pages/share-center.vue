@@ -18,14 +18,15 @@ export default {
   components: {
     ItemCard,
   },
-  async asyncData({ store }) {
-    await store.dispatch('shared_items/fetchSharedItems')
-  },
   computed: {
     ...mapGetters({ sharedItemsMap: 'shared_items/sharedItemsMap' }),
     sharedItems() {
       return Object.values(this.sharedItemsMap)
     },
+  },
+
+  async mounted() {
+    await this.fetchSharedItems()
   },
 
   methods: {

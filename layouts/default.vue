@@ -45,7 +45,7 @@
 </template>
 
 <script>
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapActions, mapMutations } from 'vuex'
 import NavDrawer from '~/components/ui/nav/NavDrawer'
 import ItemFormDrawer from '~/components/items/ItemFormDrawer'
 import PassGenDialog from '~/components/dialogs/PassGenDialog'
@@ -58,12 +58,17 @@ export default {
     PassGenDialog,
     SharingDialog,
   },
+  async fetch() {
+    await this.fetchItems()
+    // await this.fetchSharedItems()
+  },
 
   computed: {
     ...mapGetters({
       leftDrawer: 'nav/leftDrawer',
       rightDrawer: 'nav/rightDrawer',
       itemFormDirty: 'items/dirty',
+      sharedItems: 'shared_items/sharedItemsMap',
     }),
     drawer: {
       get() {
@@ -99,6 +104,10 @@ export default {
   },
 
   methods: {
+    ...mapActions({
+      fetchItems: 'items/fetchItems',
+      fetchSharedItems: 'shared_items/fetchSharedItems',
+    }),
     ...mapMutations({
       setDrawer: 'nav/SET_LEFT_DRAWER',
       setRightDrawer: 'nav/SET_RIGHT_DRAWER',

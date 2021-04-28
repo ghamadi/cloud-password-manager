@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 import ItemCard from '~/components/items/ItemCard'
 export default {
   components: {
@@ -13,14 +13,6 @@ export default {
   },
   computed: {
     ...mapGetters({ items: 'items/itemsList' }),
-  },
-
-  async mounted() {
-    await this.fetchItems()
-  },
-
-  methods: {
-    ...mapActions({ fetchItems: 'items/fetchItems' }),
   },
 }
 </script>
