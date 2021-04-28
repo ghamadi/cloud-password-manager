@@ -238,9 +238,6 @@ export default {
         .toLowerCase()
         .includes(query.toString().toLowerCase())
     },
-    closeChip(data) {
-      data.parent.selectItem(data.item)
-    },
   },
 }
 </script>

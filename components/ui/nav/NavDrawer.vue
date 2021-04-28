@@ -89,9 +89,6 @@ export default {
 
   methods: {
     ...mapMutations({ setDrawer: 'nav/SET_LEFT_DRAWER' }),
-    addVault() {
-      console.log('add program')
-    },
   },
 }
 </script>

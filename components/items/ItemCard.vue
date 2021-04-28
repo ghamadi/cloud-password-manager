@@ -123,7 +123,7 @@ export default {
           await this.deleteItem(this.item)
           this.setAlertDialog(false)
         } catch (error) {
-          // console.log(error)
+          console.log(error)
         } finally {
           this.setLoading(false)
         }

@@ -69,7 +69,7 @@ const actions = {
 
       map[originalID].recepientEmails.add(data.sharedWith)
     })
-    console.log('MAP', map)
+
     commit('SET_SHARED_ITEMS_MAP', map)
     commit('SET_LOADING', false, { root: true })
   },
