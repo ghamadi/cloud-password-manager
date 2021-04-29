@@ -3,7 +3,7 @@
     <dialog-base class="px-2 pb-2">
       <v-form ref="sharing_form">
         <v-row style="height: 400px" justify="start">
-          <v-col cols="5">
+          <v-col cols="12" sm="5">
             <h4 class="mb-3 gray-bottom-border pb-2">
               Recepient Email Addresses:
             </h4>
@@ -38,10 +38,10 @@
               </template>
             </v-combobox>
           </v-col>
-          <v-col cols="auto">
+          <v-col v-if="!$vuetify.breakpoint.mobile" cols="auto">
             <v-divider vertical></v-divider>
           </v-col>
-          <v-col cols="6">
+          <v-col cols="12" sm="6">
             <div
               v-if="sharingMode == $sharingMode.ManyToMany"
               class="mb-3 gray-bottom-border"
