@@ -48,7 +48,7 @@
       </div>
       <div class="logo">
         <v-icon color="primary lighten-1" size="50">
-          {{ $categories.find((c) => c.categoryID === item.categoryID).icon }}
+          {{ cardIcon }}
         </v-icon>
       </div>
       <span class="item-title">
@@ -91,6 +91,12 @@ export default {
 
   computed: {
     ...mapGetters({ dirty: 'items/dirty', items: 'items/itemsList' }),
+    cardIcon() {
+      const category = this.$categories.find(
+        (c) => c.categoryID === this.item.categoryID
+      )
+      return category ? category.icon : ''
+    },
   },
 
   methods: {
@@ -98,6 +104,7 @@ export default {
       decryptItem: 'items/decryptItem',
       deleteItem: 'items/deleteItem',
       addSharedItems: 'shared_items/addSharedItems',
+      deleteSharedItems: 'shared_items/deleteSharedItems',
     }),
     ...mapMutations({
       setOpenedItem: 'items/SET_OPENED_ITEM',
@@ -107,6 +114,8 @@ export default {
       setAlertDialog: 'dialogs/SET_ALERT_DIALOG',
       setCurrentAlert: 'dialogs/SET_CURRENT_ALERT',
       setSharingDialog: 'dialogs/SET_SHARING_DIALOG',
+      setSharingMode: 'shared_items/SET_SHARING_MODE',
+      setItemsToShare: 'shared_items/SET_ITEMS_TO_SHARE',
     }),
     async openItem() {
       if (!this.dirty) {
@@ -145,27 +154,20 @@ export default {
     },
 
     openSharingDialog() {
-      const okHandler = async () => {
-        try {
-          await this.addSharedItems()
-          this.setSharingDialog(false)
-        } catch (error) {
-          console.log('error', error)
-        } finally {
-          this.setLoading(false)
-        }
-      }
+      const okHandler = () => this.$root.$emit('submitSharingForm')
 
       const cancelHandler = () => {
         this.setSharingDialog(false)
       }
 
-      const ok = new this.$models.OkButton(() => okHandler())
-      const cancel = new this.$models.CancelButton(() => cancelHandler())
+      const ok = new this.$models.OkButton(okHandler)
+      const cancel = new this.$models.CancelButton(cancelHandler)
       const alert = new this.$models.AlertObject({
-        title: 'Share an item',
         actions: [ok, cancel],
       })
+
+      this.setItemsToShare([this.item])
+      this.setSharingMode(this.$sharingMode.OneToMany)
       this.setCurrentAlert(alert)
       this.setSharingDialog(true)
     },

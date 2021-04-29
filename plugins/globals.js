@@ -3,7 +3,12 @@ import rules from '@/lib/input_rules'
 import models from '@/lib/models/models'
 import { categoryIDs, categories } from '~/lib/item_categories'
 
-const utils = { rules, models, categoryIDs, categories }
+const sharingMode = {
+  ManyToMany: 0,
+  OneToMany: 1,
+}
+
+const utils = { rules, models, categoryIDs, categories, sharingMode }
 
 const components = {
   LinkButton: () => import('~/components/ui/LinkButton.vue'),

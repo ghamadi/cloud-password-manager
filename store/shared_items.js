@@ -17,6 +17,7 @@ const state = () => ({
   itemsToShare: [],
   recepientEmails: [],
   recepientsToRemove: [],
+  sharingMode: null,
 })
 const getters = {
   sharedItemsMap(state) {
@@ -34,11 +35,15 @@ const getters = {
   recepientsToRemove(state) {
     return state.recepientsToRemove
   },
+
+  sharingMode(state) {
+    return state.sharingMode
+  },
 }
 const actions = {
   async fetchSharedItems({ rootState, commit }) {
     commit('SET_LOADING', true, { root: true })
-
+    commit('SET_SHARED_ITEMS_MAP', {})
     // get all shared items and build sharedItemsMap
     const db = this.$fire.firestore
     const currentUser = rootState.auth.currentUser
@@ -64,17 +69,17 @@ const actions = {
         (item) => item.id === originalID
       )
       if (!map[originalID]) {
-        map[originalID] = { ...overview, valid, recepientEmails: new Set([]) }
+        map[originalID] = { ...overview, valid, recepientEmails: [] }
       }
 
-      map[originalID].recepientEmails.add(data.sharedWith)
+      map[originalID].recepientEmails.push(data.sharedWith)
     })
 
     commit('SET_SHARED_ITEMS_MAP', map)
     commit('SET_LOADING', false, { root: true })
   },
 
-  async addSharedItems({ state, rootState, commit }) {
+  async addSharedItems({ state, rootState, dispatch, commit }) {
     commit('SET_LOADING', true, { root: true })
 
     const db = this.$fire.firestore
@@ -83,50 +88,83 @@ const actions = {
 
     const sharedItemsBatch = db.batch()
 
-    for (const itemID of state.itemsToShare) {
+    for (const item of state.itemsToShare) {
       for (const email of state.recepientEmails) {
-        const si = new SharedItem(itemID, {
+        const si = new SharedItem(item, {
           sharedBy: currentUser.email,
           sharedWith: email,
         })
-        const docID = SHA256(si.sharedBy + si.sharedWith + itemID).toString()
+        const docID = SHA256(si.sharedBy + si.sharedWith + item.id).toString()
+
         const docRef = db.collection('sharedItems').doc(docID)
 
         const publicKey = await getPK(db, si.sharedWith)
         const docData = signAndEncryptECC(publicKey, secretKey, si)
         const { sharedBy, sharedWith } = si
-        const { encryptedID, hmac } = signAndEncryptAES(secretKey, itemID)
+        const { encryptedID, hmac } = signAndEncryptAES(secretKey, item.id)
+        const hashedID = SHA256(item.id).toString()
+
         Object.assign(docData, {
           sharedBy,
           sharedWith,
           encryptedID,
+          hashedID,
           hmac,
         })
+
         sharedItemsBatch.set(docRef, docData)
       }
-
-      const itemOverview = rootState.items.itemsList.find(
-        (item) => item.id === itemID
-      )
-      delete itemOverview.hmac
-
-      const { encryptedItem } = rootState.items.encryptedItemsMap[itemID]
-
-      commit('ADD_SHARED_ITEM_TO_MAP', {
-        itemOverview,
-        encryptedItem,
-        recepientEmails: state.recepientEmails,
-      })
     }
+
     await sharedItemsBatch.commit()
+    await dispatch('fetchSharedItems')
+    commit('SET_ITEMS_TO_SHARE', [])
     commit('SET_LOADING', false, { root: true })
   },
 
-  decryptSharedItem() {},
+  async revokeItemInvitations({ state, rootState, commit }, item) {
+    commit('SET_LOADING', true, { root: true })
 
-  async updateSharedItem() {},
+    const db = this.$fire.firestore
+    const currentUser = rootState.auth.currentUser
+    const hashedID = SHA256(item.id).toString()
 
-  async deleteSharedItem() {},
+    const sharedItemsBatch = db.batch()
+    const snapshot = await db
+      .collection('sharedItems')
+      .where('sharedBy', '==', currentUser.email)
+      .where('hashedID', '==', hashedID)
+      .get()
+
+    snapshot.forEach((doc) => sharedItemsBatch.delete(doc.ref))
+
+    await sharedItemsBatch.commit()
+  },
+
+  async deleteSharedItems({ state, rootState, dispatch, commit }) {
+    commit('SET_LOADING', true, { root: true })
+
+    const db = this.$fire.firestore
+    const currentUser = rootState.auth.currentUser
+
+    const sharedItemsBatch = db.batch()
+    for (const item of state.itemsToShare) {
+      for (const email of state.recepientsToRemove) {
+        const si = new SharedItem(item, {
+          sharedBy: currentUser.email,
+          sharedWith: email,
+        })
+        const docID = SHA256(si.sharedBy + si.sharedWith + item.id).toString()
+        const docRef = db.collection('sharedItems').doc(docID)
+
+        sharedItemsBatch.delete(docRef)
+      }
+    }
+    await sharedItemsBatch.commit()
+    await dispatch('fetchSharedItems')
+    commit('SET_RECEPIENTS_TO_REMOVE', [])
+    commit('SET_LOADING', false, { root: true })
+  },
 }
 const mutations = {
   ADD_SHARED_ITEM_TO_MAP(
@@ -143,12 +181,12 @@ const mutations = {
     const map = state.sharedItemsMap
     const id = itemOverview.id
 
-    if (!map[id]) map[id] = { recepientEmails: new Set([]) }
+    if (!map[id]) map[id] = { recepientEmails: [] }
 
     Object.assign(map[id], { ...itemOverview, encryptedItem })
 
     for (const email of recepientEmails) {
-      map[id].recepientEmails.add(email)
+      map[id].recepientEmails.push(email)
     }
   },
 
@@ -164,6 +202,24 @@ const mutations = {
 
   SET_RECEPIENT_EMAILS(state, emailsList = []) {
     state.recepientEmails = [...emailsList]
+  },
+
+  SET_RECEPIENTS_TO_REMOVE(state, emailsList = []) {
+    state.recepientsToRemove = [...emailsList]
+  },
+
+  ADD_RECEPIENT_TO_REMOVE(state, email) {
+    state.recepientsToRemove.push(email)
+  },
+
+  TAKE_OUT_RECEPIENT_TO_REMOVE(state, email) {
+    const arr = state.recepientsToRemove
+    const deleteIndex = arr.findIndex((e) => e === email)
+    arr.splice(deleteIndex, 1)
+  },
+
+  SET_SHARING_MODE(state, mode) {
+    state.sharingMode = mode
   },
 }
 export default { state, getters, actions, mutations }

@@ -1,6 +1,7 @@
 <template>
   <v-container class="gallery">
     <item-card v-for="item in items" :key="item.id" :item="item"></item-card>
+    <item-fab></item-fab>
   </v-container>
 </template>
 

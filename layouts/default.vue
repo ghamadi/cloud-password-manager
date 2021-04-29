@@ -38,7 +38,7 @@
       <alert-dialog></alert-dialog>
       <pass-gen-dialog></pass-gen-dialog>
       <sharing-dialog></sharing-dialog>
-      <item-fab></item-fab>
+
       <item-form-drawer></item-form-drawer>
     </v-main>
   </v-app>

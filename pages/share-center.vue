@@ -7,6 +7,7 @@
         :key="item.id"
         :item="item"
       ></item-card>
+      <shared-item-fab></shared-item-fab>
     </v-container>
   </div>
 </template>
@@ -14,9 +15,11 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import ItemCard from '~/components/items/ItemCard'
+import SharedItemFab from '~/components/shared_items/SharedItemFab'
 export default {
   components: {
     ItemCard,
+    SharedItemFab,
   },
   computed: {
     ...mapGetters({ sharedItemsMap: 'shared_items/sharedItemsMap' }),

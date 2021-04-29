@@ -131,9 +131,11 @@ const actions = {
     commit('UPDATE_ITEM_IN_LIST', { item: obj, encryptions: docData })
   },
 
-  async deleteItem({ rootState, commit }, item) {
+  async deleteItem({ rootState, dispatch, commit }, item) {
     const userID = rootState.auth.currentUser.uid
     commit('SET_LOADING', true, { root: true })
+
+    await dispatch('shared_items/revokeItemInvitations', item, { root: true })
 
     await this.$fire.firestore
       .collection('users')
