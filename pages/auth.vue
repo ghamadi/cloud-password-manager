@@ -81,7 +81,13 @@
             </div>
 
             <div v-else style="width: 100%" class="d-flex flex-column mt-4">
-              <v-btn color="primary" rounded x-large class="slow-expansion">
+              <v-btn
+                type="submit"
+                color="primary"
+                rounded
+                x-large
+                class="slow-expansion"
+              >
                 {{ registration ? 'Create Account' : 'Sign in' }}
               </v-btn>
               <link-button v-show="showResetBtn" class="mt-md-0 mt-5">
