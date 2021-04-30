@@ -40,22 +40,15 @@ export default {
       })
     },
   },
-
-  mounted() {
-    console.log('ITEMS', this.items)
-  },
 }
 </script>
 
 <style lang="scss">
 .gallery {
-  margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  justify-content: center;
-  overflow: auto;
-  max-width: 1320px;
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, auto));
+  justify-content: flex-start;
+  gap: 15px;
 }
 
 @media only screen and (max-width: 440px) {
