@@ -5,6 +5,8 @@
     </v-app-bar>
     <v-main>
       <nuxt />
+      <loader />
+      <snackbar />
     </v-main>
   </v-app>
 </template>

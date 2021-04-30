@@ -16,6 +16,8 @@ const components = {
   AlertDialog: () => import('~/components/dialogs/AlertDialog.vue'),
   ItemFab: () => import('~/components/items/ItemFab.vue'),
   NavLink: () => import('~/components/ui/nav/NavLink'),
+  Loader: () => import('~/components/ui/Loader'),
+  Snackbar: () => import('~/components/ui/Snackbar'),
 }
 
 Object.entries(components).forEach(([name, component]) =>

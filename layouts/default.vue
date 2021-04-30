@@ -40,6 +40,8 @@
       <sharing-dialog></sharing-dialog>
 
       <item-form-drawer></item-form-drawer>
+      <loader />
+      <snackbar />
     </v-main>
   </v-app>
 </template>
