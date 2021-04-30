@@ -1,6 +1,10 @@
 <template>
   <v-container class="gallery">
-    <item-card v-for="item in items" :key="item.id" :item="item"></item-card>
+    <item-card
+      v-for="item in itemsToShow"
+      :key="item.id"
+      :item="item"
+    ></item-card>
     <item-fab></item-fab>
   </v-container>
 </template>
@@ -12,8 +16,33 @@ export default {
   components: {
     ItemCard,
   },
+  asyncData({ query, redirect }) {
+    const queryPassed = query && Object.values(query).length
+    if (queryPassed && !query.category && !query.tag) {
+      redirect('/items')
+    }
+  },
   computed: {
     ...mapGetters({ items: 'items/itemsList' }),
+    itemsToShow() {
+      const category = this.$route.query.category || ''
+      const tag = this.$route.query.tag || ''
+      return this.items.filter((item) => {
+        const tagsIncluded = item.tags && item.tags.includes(tag.toLowerCase())
+        const categoryMatch = item.categoryID === category.toLowerCase()
+
+        return (
+          (!tag && !category) ||
+          (tag && category && tagsIncluded && categoryMatch) ||
+          (tag && !category && tagsIncluded) ||
+          (category && !tag && categoryMatch)
+        )
+      })
+    },
+  },
+
+  mounted() {
+    console.log('ITEMS', this.items)
   },
 }
 </script>
