@@ -1,6 +1,6 @@
 <template>
-  <v-row justify="center" align="center">
-    <v-btn @click="logout">LOGOUT</v-btn>
+  <v-row style="height: 90vh" justify="center" align="center">
+    <v-btn x-large color="primary" @click="logout">LOGOUT</v-btn>
   </v-row>
 </template>
 
