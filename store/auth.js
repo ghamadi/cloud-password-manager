@@ -35,9 +35,20 @@ const actions = {
       .collection('publicKeys')
       .add({ email, publicKey: keyGen.publicKey.toString() })
 
-    dispatch('logout')
-
     commit('SET_LOADING', false, { root: true })
+
+    await dispatch(
+      'displaySnackbar',
+      {
+        top: true,
+        message: 'Welcome to CPass! Please verify your email to login.',
+        actionColor: 'primary lighten-1',
+        timeout: 5000,
+      },
+      { root: true }
+    )
+
+    dispatch('logout')
   },
 
   async login({ commit }, { email, password }) {
