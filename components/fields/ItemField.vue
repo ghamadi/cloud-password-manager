@@ -1,144 +1,155 @@
 <template>
-  <div class="item-field d-flex justify-start align-center mb-2">
-    <v-btn
-      icon
-      small
-      color="primary lighten-1"
-      class="mt-1 ml-4"
-      @click="deleteField(fieldIndex)"
-    >
-      <v-icon small>mdi-minus-circle</v-icon>
-    </v-btn>
-    <!-- LABEL -->
-    <v-text-field
-      :ref="`field_label_${fieldIndex}`"
-      v-model="label"
-      dense
-      class="field-input field-label shrink mr-2"
-      placeholder="label"
-      hide-details
-      color="info"
-      :outlined="focused"
-      :rules="[$rules.required]"
-      @focus="onFocus"
-      @blur="focused = false"
-    />
+  <v-row class="item-field mb-2" justify="start" align="center" no-gutters>
+    <v-col cols="1">
+      <v-btn
+        icon
+        small
+        color="primary lighten-1"
+        class="mt-1 ml-4"
+        @click="deleteField(fieldIndex)"
+      >
+        <v-icon small>mdi-minus-circle</v-icon>
+      </v-btn>
+    </v-col>
 
-    <!-- TEXTAREA INPUT (if type == long-text) -->
-    <v-textarea
-      v-if="type == 'long-text'"
-      v-model="value"
-      color="info"
-      class="field-input"
-      rows="1"
-      row-height="40"
-      dense
-      outlined
-      auto-grow
-      no-resize
-      hide-details
-    ></v-textarea>
+    <v-col cols="11" md="auto" class="mb-2 mb-md-0">
+      <!-- LABEL -->
+      <v-text-field
+        :ref="`field_label_${fieldIndex}`"
+        v-model="label"
+        dense
+        :class="`field-input field-label shrink mr-2 ml-4 ml-md-0  ${
+          $vuetify.breakpoint.mobile ? 'text--left' : 'text--right'
+        }`"
+        placeholder="label"
+        hide-details
+        color="info"
+        :outlined="focused"
+        :rules="[$rules.required]"
+        @focus="onFocus"
+        @blur="focused = false"
+      />
+    </v-col>
 
-    <!-- DATE INPUT (if type == date) -->
-    <v-menu
-      v-else-if="type == 'date'"
-      v-model="datePicker"
-      :close-on-content-click="false"
-      :nudge-right="40"
-      transition="scale-transition"
-      offset-y
-      min-width="auto"
-    >
-      <template #activator="{ on, attrs }">
-        <v-text-field
-          :value="value"
-          outlined
-          color="info"
-          dense
-          v-bind="attrs"
-          placeholder="Click to pick a date"
-          hide-details
-          class="field-input"
-          v-on="on"
-        ></v-text-field>
-      </template>
-      <v-date-picker
+    <v-col cols="9" md="7" class="ml-4 ml-md-0 d-flex align-center">
+      <!-- TEXTAREA INPUT (if type == long-text) -->
+      <v-textarea
+        v-if="type == 'long-text'"
         v-model="value"
-        @input="datePicker = false"
-      ></v-date-picker>
-    </v-menu>
+        color="info"
+        class="field-input"
+        rows="1"
+        row-height="40"
+        dense
+        outlined
+        auto-grow
+        no-resize
+        hide-details
+      ></v-textarea>
 
-    <!-- TEXT INPUT (default) -->
-    <v-text-field
-      v-else
-      v-model="value"
-      :type="type"
-      color="info"
-      dense
-      :outlined="!typeIsPassword"
-      :loading="typeIsPassword"
-      :class="`field-input ${typeIsPassword ? 'password-input' : ''}`"
-      hide-details
-    >
-      <template #progress>
-        <v-progress-linear
-          v-if="typeIsPassword"
-          :value="passwordStrength.strength"
-          :color="passwordStrength.color"
-          background-opacity="0.2"
-          :indeterminate="false"
-          absolute
-          height="4"
-          rounded
-          style="top: 26px"
-        ></v-progress-linear>
-      </template>
-
-      <template #append>
-        <v-btn
-          v-if="typeIsPassword"
-          icon
-          x-small
-          :ripple="false"
-          class="mr-3 mt-1"
-          @click="showPass = !showPass"
-        >
-          <v-icon color="info">{{ inputAppendIcon }}</v-icon>
-        </v-btn>
-      </template>
-    </v-text-field>
-
-    <v-btn v-if="typeIsPassword" icon small @click="openPassGen">
-      <v-icon small>mdi-key-variant</v-icon>
-    </v-btn>
-
-    <!-- TYPE PICKER -->
-    <v-menu v-model="fieldActions">
-      <template #activator="{ on, attrs }">
-        <v-btn icon small v-bind="attrs" class="mr-3" v-on="on">
-          <v-icon small>mdi-dots-horizontal-circle-outline</v-icon>
-        </v-btn>
-      </template>
-      <v-list dense shaped>
-        <v-list-item-group v-model="type" color="primary">
-          <v-list-item
-            v-for="(fieldType, i) in fieldTypes"
-            :key="i"
+      <!-- DATE INPUT (if type == date) -->
+      <v-menu
+        v-else-if="type == 'date'"
+        v-model="datePicker"
+        :close-on-content-click="false"
+        :nudge-right="40"
+        transition="scale-transition"
+        offset-y
+        min-width="auto"
+      >
+        <template #activator="{ on, attrs }">
+          <v-text-field
+            :value="value"
+            outlined
+            color="info"
             dense
-            :value="fieldType.value"
-          >
-            <v-list-item-icon>
-              <v-icon v-text="fieldType.icon"></v-icon>
-            </v-list-item-icon>
+            v-bind="attrs"
+            placeholder="Click to pick a date"
+            hide-details
+            class="field-input"
+            v-on="on"
+          ></v-text-field>
+        </template>
+        <v-date-picker
+          v-model="value"
+          @input="datePicker = false"
+        ></v-date-picker>
+      </v-menu>
 
-            <v-list-item-content>
-              <v-list-item-title v-text="fieldType.label"></v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-        </v-list-item-group>
-      </v-list>
-    </v-menu>
-  </div>
+      <!-- TEXT INPUT (default) -->
+      <v-text-field
+        v-else
+        v-model="value"
+        :type="type"
+        color="info"
+        dense
+        :outlined="!typeIsPassword"
+        :loading="typeIsPassword"
+        :class="`field-input ${typeIsPassword ? 'password-input' : ''}`"
+        hide-details
+      >
+        <template #progress>
+          <v-progress-linear
+            v-if="typeIsPassword"
+            :value="passwordStrength.strength"
+            :color="passwordStrength.color"
+            background-opacity="0.2"
+            :indeterminate="false"
+            absolute
+            height="4"
+            rounded
+            style="top: 26px"
+          ></v-progress-linear>
+        </template>
+
+        <template #append>
+          <v-btn
+            v-if="typeIsPassword"
+            icon
+            x-small
+            :ripple="false"
+            class="mr-3 mt-1"
+            @click="showPass = !showPass"
+          >
+            <v-icon color="info">{{ inputAppendIcon }}</v-icon>
+          </v-btn>
+        </template>
+      </v-text-field>
+
+      <v-btn v-if="typeIsPassword" icon small @click="openPassGen">
+        <v-icon small>mdi-key-variant</v-icon>
+      </v-btn>
+    </v-col>
+
+    <v-col cols="auto">
+      <!-- TYPE PICKER -->
+      <v-menu v-model="fieldActions">
+        <template #activator="{ on, attrs }">
+          <v-btn icon small v-bind="attrs" class="mr-3" v-on="on">
+            <v-icon small>mdi-dots-horizontal-circle-outline</v-icon>
+          </v-btn>
+        </template>
+        <v-list dense shaped>
+          <v-list-item-group v-model="type" color="primary">
+            <v-list-item
+              v-for="(fieldType, i) in fieldTypes"
+              :key="i"
+              dense
+              :value="fieldType.value"
+            >
+              <v-list-item-icon>
+                <v-icon v-text="fieldType.icon"></v-icon>
+              </v-list-item-icon>
+
+              <v-list-item-content>
+                <v-list-item-title v-text="fieldType.label"></v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list-item-group>
+        </v-list>
+      </v-menu>
+    </v-col>
+  </v-row>
 </template>
 
 <script>
@@ -320,8 +331,11 @@ export default {
 }
 
 .field-label >>> input {
-  text-align: right;
   overflow: none;
   text-overflow: ellipsis;
+}
+
+.text--right >>> input {
+  text-align: right;
 }
 </style>
