@@ -27,7 +27,7 @@
           </template>
 
           <template #append>
-            <div>
+            <div class="d-flex">
               <v-btn icon small class="mr-2" @click="copyPass">
                 <v-icon color="info">mdi-content-copy</v-icon>
               </v-btn>
@@ -66,7 +66,13 @@
           column
           active-class="primary lighten-1"
         >
-          <div class="chip-container mt-5">
+          <div
+            :class="`${
+              $vuetify.breakpoint.mobile
+                ? 'chip-container'
+                : 'chip-container-flex'
+            } mt-5`"
+          >
             <v-chip
               v-for="option in options"
               :key="option"
@@ -162,6 +168,7 @@ export default {
 <style scoped>
 .password-field >>> input {
   font-size: 1.4em;
+  text-overflow: ellipsis;
 }
 
 .length-input {
@@ -172,9 +179,18 @@ export default {
   padding: 5px;
 }
 
-.chip-container {
+.chip-container-flex {
   display: flex;
   justify-content: center;
   width: 100%;
+}
+
+.chip-container {
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  justify-content: space-between;
+  column-gap: 10px;
+  row-gap: 5px;
 }
 </style>
