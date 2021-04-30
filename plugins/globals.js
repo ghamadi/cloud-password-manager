@@ -15,6 +15,7 @@ const components = {
   DialogBase: () => import('~/components/dialogs/DialogBase.vue'),
   AlertDialog: () => import('~/components/dialogs/AlertDialog.vue'),
   ItemFab: () => import('~/components/items/ItemFab.vue'),
+  NavLink: () => import('~/components/ui/nav/NavLink'),
 }
 
 Object.entries(components).forEach(([name, component]) =>

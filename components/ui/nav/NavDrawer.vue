@@ -1,6 +1,6 @@
 <template>
   <v-navigation-drawer
-    id="main-navigation-drawerz"
+    id="main-navigation-drawer"
     v-model="drawer"
     color="secondary"
     class="font-weight-light"
@@ -9,7 +9,7 @@
   >
     <v-list-item
       two-line
-      class="logo d-flex justify-space-between align-center px-5"
+      class="logo d-flex justify-space-between align-center px-5 elevation-1"
     >
       <v-list-item-title>
         <div class="d-flex justify-start font-weight-medium">
@@ -31,7 +31,7 @@
       </v-list-item-action>
     </v-list-item>
 
-    <v-divider></v-divider>
+    <v-divider class="primary"></v-divider>
 
     <v-list dark>
       <nav-link
@@ -42,15 +42,19 @@
         :icon="item.icon"
       ></nav-link>
     </v-list>
+
+    <v-divider class="my-5"></v-divider>
+
+    <nav-filters-section></nav-filters-section>
   </v-navigation-drawer>
 </template>
 
 <script>
 import { mapGetters, mapMutations } from 'vuex'
-import NavLink from '~/components/ui/nav/NavLink'
+import NavFiltersSection from '~/components/ui/nav/NavFiltersSection'
 export default {
   components: {
-    NavLink,
+    NavFiltersSection,
   },
   data() {
     return {
@@ -92,37 +96,34 @@ export default {
   },
 }
 </script>
-
 <style lang="scss" scoped>
-#main-navigation-drawer {
-  .list-item:not(.active-list-item),
-  .v-list-group.active-list-item {
-    &:hover {
-      background-color: #22313b;
-    }
-
-    *,
-    .v-icon {
-      font-weight: 300;
-      color: #88959e !important;
-    }
+.list-item:not(.active-list-item),
+.v-list-group.active-list-item {
+  &:hover {
+    background-color: #22313b;
   }
 
-  .active-list-item {
-    color: white !important;
+  *,
+  .v-icon {
     font-weight: 300;
-  }
-
-  .light-gray-text {
     color: #88959e !important;
   }
+}
 
-  .logo-letter {
-    margin-right: 1px;
-  }
+.active-list-item {
+  color: white !important;
+  font-weight: 300;
+}
 
-  .logo {
-    font-size: 1.6em;
-  }
+.light-gray-text {
+  color: #88959e !important;
+}
+
+.logo-letter {
+  margin-right: 1px;
+}
+
+.logo {
+  font-size: 1.6em;
 }
 </style>
