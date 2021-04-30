@@ -4,6 +4,7 @@
     v-model="drawer"
     color="secondary"
     class="font-weight-light"
+    :width="drawerWidth"
     app
     dark
   >
@@ -89,6 +90,16 @@ export default {
         this.setDrawer(value)
       },
     },
+
+    drawerWidth() {
+      if (screen.width <= 400) return '100%'
+      return '300px'
+      // switch (this.$vuetify.breakpoint.name) {
+      //   case 'xs':
+      //     return '100%'
+      // }
+      // return '300px'
+    },
   },
 
   methods: {
@@ -125,5 +136,15 @@ export default {
 
 .logo {
   font-size: 1.6em;
+}
+
+#main-navigation-drawer {
+  width: 300px;
+}
+
+@media only screen and (max-width: 400px) {
+  #main-navigation-drawer {
+    width: 100%;
+  }
 }
 </style>
