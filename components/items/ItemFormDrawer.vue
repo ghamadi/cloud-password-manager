@@ -2,8 +2,7 @@
   <v-navigation-drawer
     id="right-drawer"
     v-model="drawer"
-    :width="`${$vuetify.breakpoint.mobile ? '100%' : '40%'}`"
-    :temporary="$vuetify.breakpoint.mobile"
+    :width="`${$vuetify.breakpoint.xs ? '100%' : '650px'}`"
     app
     clipped
     right
