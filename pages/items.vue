@@ -46,9 +46,11 @@ export default {
 <style lang="scss">
 .gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, auto));
-  justify-content: flex-start;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  justify-content: center;
   gap: 15px;
+  max-width: 1300px;
+  // background-color: green;
 }
 
 @media only screen and (max-width: 440px) {
