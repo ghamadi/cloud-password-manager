@@ -8,6 +8,10 @@
   gap: 20px;
 }
 
+.regular-font {
+  font-family: 'Noto Sans TC', sans-serif;
+}
+
 @media only screen and (max-width: 440px) {
   .gallery {
     grid-template-columns: 200px;
@@ -32,4 +36,12 @@
 
 .gray-bottom-border {
   border-bottom: 1px solid #d2d4d58e;
+}
+
+.bright-red {
+  background-color: #f14e45;
+}
+
+.bright-red--text {
+  color: #f14e45;
 }

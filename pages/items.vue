@@ -19,7 +19,7 @@ export default {
   asyncData({ query, redirect }) {
     const queryPassed = query && Object.values(query).length
     if (queryPassed && !query.category && !query.tag) {
-      redirect('/items')
+      redirect('/')
     }
   },
   computed: {

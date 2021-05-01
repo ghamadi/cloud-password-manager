@@ -18,15 +18,37 @@
           <span v-if="!drawer" class="primary--text"> CPass </span>
         </div>
 
-        <v-btn
-          icon
-          small
-          :ripple="false"
-          color="primary lighten-1"
-          class="mr-5"
-        >
-          <v-icon size="35" dark> mdi-account-circle </v-icon>
-        </v-btn>
+        <v-menu offset-y>
+          <template #activator="{ on, attrs }">
+            <v-btn
+              v-bind="attrs"
+              x-large
+              text
+              outlined
+              :ripple="false"
+              color="primary lighten-1"
+              class="mr-5 regular-font"
+              min-width="250px"
+              v-on="on"
+            >
+              <v-icon size="35" left dark> mdi-account-circle </v-icon>
+              <span class="ml-2 text-lowercase">
+                {{ currentUser && currentUser.email }}
+              </span>
+            </v-btn>
+          </template>
+
+          <v-list dense>
+            <v-list-item dense link @click.native.stop="logout">
+              <v-list-item-action>
+                <v-icon color="primary lighten-2">mdi-logout</v-icon>
+              </v-list-item-action>
+              <v-list-item-content>
+                <span class="bright-red--text">Logout</span>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-menu>
       </div>
     </v-app-bar>
 
@@ -71,6 +93,7 @@ export default {
       rightDrawer: 'nav/rightDrawer',
       itemFormDirty: 'items/dirty',
       sharedItems: 'shared_items/sharedItemsMap',
+      currentUser: 'auth/currentUser',
     }),
     drawer: {
       get() {
@@ -81,11 +104,9 @@ export default {
       },
     },
     title() {
-      // TODO: show the current category when one is selected
       return 'CPass'
     },
     titleClass() {
-      // TODO: change class to 'title' when a category is selected
       const fixedClasses =
         'white--text d-flex align-center justify-space-between'
       const varClass = 'logo'
@@ -109,6 +130,7 @@ export default {
     ...mapActions({
       fetchItems: 'items/fetchItems',
       fetchSharedItems: 'shared_items/fetchSharedItems',
+      logout: 'auth/logout',
     }),
     ...mapMutations({
       setDrawer: 'nav/SET_LEFT_DRAWER',

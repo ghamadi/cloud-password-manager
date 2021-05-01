@@ -3,7 +3,7 @@ export default function ({ store, route, redirect }) {
 
   if (user.uid && user.verified) {
     if (route.name === 'auth') {
-      redirect({ name: 'home' })
+      redirect({ name: 'items' })
     }
   } else if (route.name !== 'auth') {
     redirect({ name: 'auth' })

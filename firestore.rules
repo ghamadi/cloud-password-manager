@@ -1,0 +1,33 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+  	match /users/{userID} {
+    	// allow any registered user to create an user document
+    	allow create: if request.auth != null;
+      // a user can only read, update, or delete their own document
+      allow read, update, delete: if request.auth != null && request.auth.uid == userID;
+      
+      match /items/{itemID} {
+      	// only owner can read/write their items
+      	allow read, write: if request.auth != null && request.auth.uid == userID;
+      }
+    }
+    match /publicKeys/{document=**}{
+    	// any authenticated user can read a publicKeys document
+    	allow read: if request.auth != null;
+    	// an authenticated user can create a publicKey document for themselves ONLY
+    	allow create: if request.auth != null && request.resource.data.email == request.auth.token.email;
+      // only owner can update and delete his/her publicKey document
+      allow update, delete: if request.auth != null && request.auth.token.email == resource.data.email
+    }
+    
+    match /sharedItems/{document=**} {
+      // only owner can create & update a shared item
+      allow create, update: if request.auth != null && request.auth.token.email == request.resource.data.sharedBy;
+      // owner and receiver can read and delete a shared item
+      allow read, delete: if request.auth != null && 
+      										(request.auth.token.email == resource.data.sharedBy || 
+														request.auth.token.email == resource.data.sharedWith);
+    }
+  }
+}

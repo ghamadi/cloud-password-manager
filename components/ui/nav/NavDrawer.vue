@@ -62,11 +62,6 @@ export default {
       miniVariant: true,
       items: [
         {
-          icon: 'mdi-home-variant',
-          title: 'Home',
-          to: '/',
-        },
-        {
           icon: 'mdi-view-dashboard',
           title: 'All items',
           to: { name: 'items' },

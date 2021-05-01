@@ -34,7 +34,7 @@ export default {
   plugins: ['@/plugins/globals', '@/plugins/vuex-persist'],
 
   router: {
-    middleware: 'authenticate',
+    middleware: ['authenticate', 'home_to_items'],
   },
 
   // Auto import components: https://go.nuxtjs.dev/config-components
@@ -67,14 +67,29 @@ export default {
     },
     services: {
       auth: {
+        static: true,
         persistence: 'local', // default
         initialize: {
           onAuthStateChangedMutation: 'auth/SET_CURRENT_USER',
-          subscribeManually: false,
+          // subscribeManually: false,
         },
       },
       firestore: {
-        enablePersistence: true,
+        // ...
+        static: true,
+        enablePersistence: {
+          /**
+           * Whether to synchronize the in-memory state of multiple tabs. Setting this
+           * to 'true' in all open tabs enables shared access to local persistence,
+           * shared execution of queries and latency-compensated local document updates
+           * across all connected instances.
+           *
+           * To enable this mode, `synchronizeTabs:true` needs to be set globally in all
+           * active tabs. If omitted or set to 'false', `enablePersistence()` will fail
+           * in all but the first tab.
+           */
+          synchronizeTabs: true,
+        },
       },
       analytics: true,
     },
@@ -84,6 +99,21 @@ export default {
   pwa: {
     manifest: {
       lang: 'en',
+      display: 'standalone',
+    },
+    workbox: {
+      offline: true,
+      runtimeCaching: [
+        {
+          urlPattern: 'https://fonts.googleapis.com/.*',
+          handler: 'cacheFirst',
+          method: 'GET',
+          strategyOptions: { cacheableResponse: { statuses: [0, 200] } },
+        },
+        {
+          urlPattern: 'https://cloud-password-manager-1.web.app/.*',
+        },
+      ],
     },
   },
 
