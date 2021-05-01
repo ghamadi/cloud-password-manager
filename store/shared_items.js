@@ -1,16 +1,11 @@
 import SHA256 from 'crypto-js/sha256'
-import {
-  encrypt as encryptECC,
-  // decrypt as decryptECC,
-} from '~/lib/security/ecc'
-
+import SharedItem from '~/lib/models/shared_item'
+import { randomSalt, hmac512 } from '~/lib/security/hmac'
+import { encrypt as encryptECC } from '~/lib/security/ecc'
 import {
   encrypt as encryptAES,
   decrypt as decryptAES,
 } from '~/lib/security/aes'
-import { randomSalt, hmac512 } from '~/lib/security/hmac'
-
-import SharedItem from '~/lib/models/shared_item'
 
 const state = () => ({
   sharedItemsMap: {},
@@ -90,19 +85,23 @@ const actions = {
 
     for (const item of state.itemsToShare) {
       for (const email of state.recepientEmails) {
-        const si = new SharedItem(item, {
+        const fullItem = await dispatch('items/decryptItem', item.id, {
+          root: true,
+        })
+
+        const si = new SharedItem(fullItem, {
           sharedBy: currentUser.email,
           sharedWith: email,
         })
-        const docID = SHA256(si.sharedBy + si.sharedWith + item.id).toString()
 
+        console.log('SHARING', si, si.toOverviewJson(), si.toJson())
+        const hashedID = SHA256(item.id).toString()
+        const docID = SHA256(si.sharedBy + si.sharedWith + hashedID).toString()
         const docRef = db.collection('sharedItems').doc(docID)
-
         const publicKey = await getPK(db, si.sharedWith)
         const docData = signAndEncryptECC(publicKey, secretKey, si)
         const { sharedBy, sharedWith } = si
         const { encryptedID, hmac } = signAndEncryptAES(secretKey, item.id)
-        const hashedID = SHA256(item.id).toString()
 
         Object.assign(docData, {
           sharedBy,
@@ -154,7 +153,8 @@ const actions = {
           sharedBy: currentUser.email,
           sharedWith: email,
         })
-        const docID = SHA256(si.sharedBy + si.sharedWith + item.id).toString()
+        const hashedID = SHA256(item.id).toString()
+        const docID = SHA256(si.sharedBy + si.sharedWith + hashedID).toString()
         const docRef = db.collection('sharedItems').doc(docID)
 
         sharedItemsBatch.delete(docRef)
@@ -225,8 +225,12 @@ const mutations = {
 export default { state, getters, actions, mutations }
 
 function signAndEncryptECC(publicKey, secretKey, item) {
-  const encryptedItem = encryptECC(publicKey, secretKey, item.toOverviewJson())
-  const encryptedOverview = encryptECC(publicKey, secretKey, item.toJson())
+  const encryptedItem = encryptECC(publicKey, secretKey, item.toJson())
+  const encryptedOverview = encryptECC(
+    publicKey,
+    secretKey,
+    item.toOverviewJson()
+  )
 
   return { encryptedItem, encryptedOverview }
 }
