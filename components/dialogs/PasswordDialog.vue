@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="dialog" max-width="600px">
+  <v-dialog v-model="dialog" max-width="600px" persistent>
     <dialog-base>
       <v-form ref="password_change_form">
         <v-text-field
@@ -76,6 +76,8 @@ export default {
         return this.passwordDialog
       },
       set(value) {
+        const form = this.$refs.password_change_form
+        if (form) form.reset()
         this.setPasswordDialog(value)
       },
     },
@@ -83,6 +85,13 @@ export default {
 
   created() {
     this.$root.$on('submitChangePassForm', this.submitForm)
+    this.$root.$on('closeChangePassForm', () => {
+      const form = this.$refs.password_change_form
+      if (form) form.reset()
+      this.showCurrentPass = false
+      this.showNewPass = false
+      this.showVerifiedPass = false
+    })
   },
 
   methods: {
@@ -135,7 +144,6 @@ export default {
                 timeout: 4000,
               })
             } else {
-              console.log(e)
               this.setSnackbarObject({
                 message: e.message,
                 top: true,

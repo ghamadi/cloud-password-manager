@@ -18,7 +18,7 @@
           <span v-if="!drawer" class="primary--text"> CPass </span>
         </div>
 
-        <v-menu offset-y>
+        <v-menu offset-y close-on-click>
           <template #activator="{ on, attrs }">
             <v-btn
               v-bind="attrs"
@@ -166,6 +166,7 @@ export default {
     openPasswordDialog() {
       const okHandler = () => this.$root.$emit('submitChangePassForm')
       const cancelHandler = () => {
+        this.$root.$emit('closeChangePassForm')
         this.setCurrentAlert({})
         this.setPasswordDialog(false)
       }
