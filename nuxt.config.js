@@ -67,7 +67,6 @@ export default {
     },
     services: {
       auth: {
-        static: true,
         persistence: 'local', // default
         initialize: {
           onAuthStateChangedMutation: 'auth/SET_CURRENT_USER',
@@ -76,7 +75,6 @@ export default {
       },
       firestore: {
         // ...
-        static: true,
         enablePersistence: {
           /**
            * Whether to synchronize the in-memory state of multiple tabs. Setting this

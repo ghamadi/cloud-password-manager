@@ -4,6 +4,7 @@ const state = () => ({
   alertDialog: false,
   passGenDialog: false,
   sharingDialog: false,
+  passwordDialog: false,
   currentAlert: {},
 })
 
@@ -23,6 +24,10 @@ const getters = {
   currentAlert(state) {
     return state.currentAlert
   },
+
+  passwordDialog(state) {
+    return state.passwordDialog
+  },
 }
 
 const actions = {}
@@ -38,6 +43,10 @@ const mutations = {
 
   SET_SHARING_DIALOG(state, value) {
     state.sharingDialog = value
+  },
+
+  SET_PASSWORD_DIALOG(state, value) {
+    state.passwordDialog = value
   },
 
   SET_CURRENT_ALERT(state, obj) {

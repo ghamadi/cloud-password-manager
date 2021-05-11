@@ -6,6 +6,7 @@ export default ({ store }) => {
     reducer: (state) => {
       return {
         auth: {
+          currentUser: state.auth.currentUser,
           keyGen: state.auth.keyGen
             ? {
                 vaultKey: state.auth.keyGen.vaultKey,

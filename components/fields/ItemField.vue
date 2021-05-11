@@ -281,7 +281,6 @@ export default {
 
       const alertObject = new AlertObject({
         title: 'Password Generator',
-        message: 'test',
         actions: [ok, cancel],
       })
       this.setRandomPass(this.value)

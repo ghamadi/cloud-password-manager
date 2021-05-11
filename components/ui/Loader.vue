@@ -19,7 +19,6 @@ export default {
     ...mapGetters({ loading: 'loading' }),
     dialog: {
       get() {
-        console.log('getter')
         return this.loading
       },
       set(value) {

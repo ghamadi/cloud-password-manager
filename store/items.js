@@ -38,62 +38,61 @@ const actions = {
     const docData = signAndEncryptAES(keyGen.vaultKey, item)
     commit('SET_LOADING', true, { root: true })
 
-    const itemRef = await this.$fire.firestore
+    await this.$fire.firestore
       .collection('users')
       .doc(userID)
       .collection('items')
       .add(docData)
 
-    const obj = { ...item, id: itemRef.id }
-
     commit('SET_LOADING', false, { root: true })
-    commit('ADD_ITEM_TO_LIST', { item: obj, encryptions: docData })
   },
 
-  async fetchItems({ rootState, commit }) {
-    const items = []
-    const detailedItems = {}
-    const { userID, keyGen } = userAndKey(rootState)
-
-    commit('SET_LOADING', true, { root: true })
-
-    const querySnapshot = await this.$fire.firestore
+  fetchItems({ rootState, commit }) {
+    const { userID } = userAndKey(rootState)
+    this.$fire.firestore
       .collection('users')
       .doc(userID)
       .collection('items')
-      .get()
+      .onSnapshot((querySnapshot) => {
+        const items = []
+        const detailedItems = {}
+        commit('SET_LOADING', true, { root: true })
+        querySnapshot.forEach((itemDoc) => {
+          const keyGen = rootState.auth.keyGen
+          const data = itemDoc.data()
 
-    querySnapshot.forEach((itemDoc) => {
-      const data = itemDoc.data()
-      const decryptedOverview = decrypt(keyGen.vaultKey, data.encryptedOverview)
-      const storedHMAC = data.overviewHMAC
-      const computedHMAC = hmac512(
-        decryptedOverview,
-        decryptedOverview.salt,
-        keyGen.vaultKey
-      )
+          const decryptedOverview = decrypt(
+            Object.values(keyGen.vaultKey),
+            data.encryptedOverview
+          )
+          const storedHMAC = data.overviewHMAC
+          const computedHMAC = hmac512(
+            decryptedOverview,
+            decryptedOverview.salt,
+            keyGen.vaultKey
+          )
 
-      // no need to store the salt on client
-      // updated records will have new salts
-      delete decryptedOverview.salt
+          // no need to store the salt on client
+          // updated records will have new salts
+          delete decryptedOverview.salt
 
-      const valid = storedHMAC === computedHMAC
-      const itemObj = {
-        id: itemDoc.id,
-        ...decryptedOverview,
-        hmac: storedHMAC,
-        valid,
-      }
-      items.push(itemObj)
-      detailedItems[itemDoc.id] = (({ encryptedItem, itemHMAC }) => ({
-        encryptedItem,
-        itemHMAC,
-      }))(data)
-    })
-
-    commit('SET_LOADING', false, { root: true })
-    commit('SET_ENCRYPTED_ITEMS_MAP', detailedItems)
-    commit('SET_ITEMS_LIST', items)
+          const valid = storedHMAC === computedHMAC
+          const itemObj = {
+            id: itemDoc.id,
+            ...decryptedOverview,
+            hmac: storedHMAC,
+            valid,
+          }
+          items.push(itemObj)
+          detailedItems[itemDoc.id] = (({ encryptedItem, itemHMAC }) => ({
+            encryptedItem,
+            itemHMAC,
+          }))(data)
+        })
+        commit('SET_LOADING', false, { root: true })
+        commit('SET_ENCRYPTED_ITEMS_MAP', detailedItems)
+        commit('SET_ITEMS_LIST', items)
+      })
   },
 
   decryptItem({ rootState, state }, id) {
@@ -113,7 +112,7 @@ const actions = {
     return new Item(itemObj)
   },
 
-  async updateItem({ rootState, commit }, item) {
+  async updateItem({ rootState, dispatch, commit }, item) {
     const { userID, keyGen } = userAndKey(rootState)
     const docData = signAndEncryptAES(keyGen.vaultKey, item)
     commit('SET_LOADING', true, { root: true })
@@ -126,6 +125,8 @@ const actions = {
 
     const obj = { ...item, id: item.id }
     obj.fields = item.fields.map((f) => new Field(f))
+
+    await dispatch('shared_items/updateSharedItem', item, { root: true })
 
     commit('SET_LOADING', false, { root: true })
     commit('UPDATE_ITEM_IN_LIST', { item: obj, encryptions: docData })
@@ -146,6 +147,33 @@ const actions = {
 
     commit('SET_LOADING', false, { root: true })
     commit('REMOVE_ITEM_FROM_LIST', item)
+  },
+
+  async reEncryptVault({ rootState }, oldVK) {
+    const { userID, keyGen } = userAndKey(rootState)
+    const newVK = keyGen.vaultKey
+
+    // RE-ENCRYPT MY ITEMS
+    const itemsSnapshot = await this.$fire.firestore
+      .collection('users')
+      .doc(userID)
+      .collection('items')
+      .get()
+
+    const batch = this.$fire.firestore.batch()
+
+    itemsSnapshot.forEach((itemDoc) => {
+      const data = itemDoc.data()
+      const decrypted = decrypt(oldVK, data.encryptedItem)
+      const itemObj = {
+        id: itemDoc.id,
+        ...decrypted,
+      }
+      const item = new Item(itemObj)
+      const newDocData = signAndEncryptAES(newVK, item)
+      batch.set(itemDoc.ref, newDocData)
+    })
+    await batch.commit()
   },
 }
 const mutations = {

@@ -53,7 +53,6 @@ const actions = {
 
   async login({ commit }, { email, password }) {
     const keyGen = new KeyGen(email, password)
-    commit('SET_LOADING', true, { root: true })
     const userCred = await this.$fire.auth.signInWithEmailAndPassword(
       email,
       keyGen.authKey
@@ -61,6 +60,20 @@ const actions = {
     commit('SET_CURRENT_USER', { authUser: userCred.user })
     commit('SET_KEY_GEN', keyGen)
     return userCred
+  },
+
+  async updatePublicKey({ state }, publicKey) {
+    const db = this.$fire.firestore
+    const email = state.currentUser.email
+
+    const snapshot = await db
+      .collection('publicKeys')
+      .where('email', '==', email)
+      .get()
+
+    await snapshot.forEach(async (doc) => {
+      await doc.ref.set({ email, publicKey })
+    })
   },
 
   async logout({ dispatch }) {
@@ -77,6 +90,7 @@ const actions = {
 }
 const mutations = {
   SET_CURRENT_USER(state, payload) {
+    console.log('MUTATION', payload)
     const authUser = (payload && payload.authUser) || null
     if (authUser) {
       const {

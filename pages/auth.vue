@@ -56,7 +56,7 @@
               :append-icon="showPass ? 'mdi-eye' : 'mdi-eye-off'"
               :type="showPass ? 'text' : 'password'"
               validate-on-blur
-              :rules="[$rules.required, $rules.min(8)]"
+              :rules="[$rules.required, $rules.min(10)]"
               color="info"
               label="Password"
               @click:append="showPass = !showPass"
@@ -163,6 +163,7 @@ export default {
         if (this.registration) this.register(data)
         else {
           try {
+            this.loading = true
             const response = await this.login(data)
             if (!response.user.emailVerified) {
               this.unverifiedUser = 'Please verify your email first.'
@@ -176,10 +177,14 @@ export default {
             } else {
               this.badCredentials = error.message
             }
+          } finally {
+            this.loading = false
           }
         }
-        this.$refs.auth_form.reset()
-        this.registration = false
+        if (this.registration) {
+          this.$refs.auth_form.reset()
+          this.registration = false
+        }
       }
     },
 

@@ -39,12 +39,32 @@
           </template>
 
           <v-list dense>
-            <v-list-item dense link @click.native.stop="logout">
+            <v-list-item
+              class="menu-list-item"
+              dense
+              link
+              @click.native.stop="openPasswordDialog"
+            >
+              <v-list-item-action>
+                <v-icon color="primary lighten-2">mdi-key-change</v-icon>
+              </v-list-item-action>
+              <v-list-item-content>
+                <span class="bright-red--text small-text"
+                  >Change master password</span
+                >
+              </v-list-item-content>
+            </v-list-item>
+            <v-list-item
+              class="menu-list-item"
+              dense
+              link
+              @click.native.stop="logout"
+            >
               <v-list-item-action>
                 <v-icon color="primary lighten-2">mdi-logout</v-icon>
               </v-list-item-action>
               <v-list-item-content>
-                <span class="bright-red--text">Logout</span>
+                <span class="bright-red--text small-text">Logout</span>
               </v-list-item-content>
             </v-list-item>
           </v-list>
@@ -60,6 +80,7 @@
       <alert-dialog></alert-dialog>
       <pass-gen-dialog></pass-gen-dialog>
       <sharing-dialog></sharing-dialog>
+      <password-dialog></password-dialog>
 
       <item-form-drawer></item-form-drawer>
       <loader />
@@ -74,6 +95,8 @@ import NavDrawer from '~/components/ui/nav/NavDrawer'
 import ItemFormDrawer from '~/components/items/ItemFormDrawer'
 import PassGenDialog from '~/components/dialogs/PassGenDialog'
 import SharingDialog from '~/components/dialogs/SharingDialog'
+import PasswordDialog from '~/components/dialogs/PasswordDialog'
+import { AlertObject, CancelButton, OkButton } from '~/lib/models/alert_data'
 
 export default {
   components: {
@@ -81,6 +104,7 @@ export default {
     ItemFormDrawer,
     PassGenDialog,
     SharingDialog,
+    PasswordDialog,
   },
   async fetch() {
     await this.fetchItems()
@@ -135,7 +159,27 @@ export default {
     ...mapMutations({
       setDrawer: 'nav/SET_LEFT_DRAWER',
       setRightDrawer: 'nav/SET_RIGHT_DRAWER',
+      setCurrentAlert: 'dialogs/SET_CURRENT_ALERT',
+      setPasswordDialog: 'dialogs/SET_PASSWORD_DIALOG',
     }),
+
+    openPasswordDialog() {
+      const okHandler = () => this.$root.$emit('submitChangePassForm')
+      const cancelHandler = () => {
+        this.setCurrentAlert({})
+        this.setPasswordDialog(false)
+      }
+      const ok = new OkButton(okHandler)
+      const cancel = new CancelButton(cancelHandler)
+
+      const alertObj = new AlertObject({
+        title: 'Change Master Password',
+        actions: [ok, cancel],
+      })
+
+      this.setCurrentAlert(alertObj)
+      this.setPasswordDialog(true)
+    },
   },
 }
 </script>
@@ -157,6 +201,18 @@ html {
   }
   .logo {
     font-family: 'Megrim', cursive;
+  }
+
+  .small-text {
+    font-size: 0.8em;
+  }
+
+  .menu-list-item {
+    padding-top: 0;
+
+    & > * {
+      margin: 0;
+    }
   }
 }
 </style>
