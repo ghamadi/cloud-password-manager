@@ -62,25 +62,7 @@
               @click:append="showPass = !showPass"
             ></v-text-field>
 
-            <div
-              v-if="!mobileScreen"
-              style="width: 100%"
-              class="d-flex justify-space-between align-center mt-4"
-            >
-              <v-btn
-                type="submit"
-                color="primary"
-                rounded
-                x-large
-                :width="registration ? '100%' : '60%'"
-                class="slow-expansion"
-              >
-                {{ registration ? 'Create Account' : 'Sign in' }}
-              </v-btn>
-              <link-button v-show="showResetBtn"> Reset password </link-button>
-            </div>
-
-            <div v-else style="width: 100%" class="d-flex flex-column mt-4">
+            <div style="width: 100%" class="d-flex flex-column mt-4">
               <v-btn
                 type="submit"
                 color="primary"
@@ -90,9 +72,6 @@
               >
                 {{ registration ? 'Create Account' : 'Sign in' }}
               </v-btn>
-              <link-button v-show="showResetBtn" class="mt-md-0 mt-5">
-                Reset password
-              </link-button>
             </div>
           </v-form>
         </v-card-text>
