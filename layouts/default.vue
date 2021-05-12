@@ -8,14 +8,19 @@
           <v-btn
             v-show="!drawer"
             plain
-            class="mr-2 ml-2 mt-1"
+            class="ml-2 mt-1"
             icon
             @click="drawer = !drawer"
           >
             <v-icon color="secondary">mdi-menu</v-icon>
           </v-btn>
 
-          <span v-if="!drawer" class="primary--text"> CPass </span>
+          <span
+            v-if="!drawer && !$vuetify.breakpoint.smAndDown"
+            class="primary--text"
+          >
+            CPass
+          </span>
         </div>
 
         <v-menu offset-y close-on-click>
